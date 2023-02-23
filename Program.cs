@@ -8,6 +8,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<WeatherForecastService>();
+builder.Services.AddAntDesign();
+builder.Services.AddCors();
 
 var app = builder.Build();
 
@@ -15,14 +17,16 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
+    app.UseHsts();
 }
-
+app.UseHttpsRedirection();
 
 app.UseStaticFiles();
-
 app.UseRouting();
+app.UseCors(builder => builder.AllowAnyOrigin());
 
 app.MapBlazorHub();
-app.MapFallbackToPage("/_Host");
+app.MapFallbackToPage("/Index");
+
 
 app.Run();

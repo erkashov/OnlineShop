@@ -1,0 +1,32 @@
+﻿@using Models
+@switch (@StateRoleNavBar?.RoleName)
+{
+    case "WorkWithVDEW":
+        <WorkWithVDEW CurrentUser="CurrentUser"></WorkWithVDEW>
+        break;
+    case "StatsCollect":
+        <StatsCollect></StatsCollect>
+        break;
+    case "WorkWithGroupVDEW":
+        <WorkWithGroupVDEW CurrentUser="CurrentUser" ></WorkWithGroupVDEW>
+        break;
+    case "StatsCollectionPage":
+        <StatsCollectionPage CurrentUser="CurrentUser"></StatsCollectionPage>
+        break;
+    case "WorkWithCuratorVDEW":
+        <WorkWithCuratorVDEW CurrentUser="CurrentUser"></WorkWithCuratorVDEW>
+        break;
+    default:       
+        break;
+}
+
+@code {
+    [Parameter]
+    public User? CurrentUser { get; set; }
+
+    [Parameter]
+    public StateRoleNavBar? StateRoleNavBar { get; set; }
+
+    [Parameter]
+    public EventCallback<StateRoleNavBar> StateRoleNavBarCallback { get; set; }
+}

@@ -1,0 +1,12 @@
+﻿@using OnlineShop.Models
+<HeaderComponent RoleCallback="@SetUser"></HeaderComponent>
+<FooterComponent></FooterComponent>
+
+@code {
+    [Parameter] public User? CurrentUser { get; set; }
+
+    public void SetUser(User? user)
+    {
+        CurrentUser = user;
+    }
+}
