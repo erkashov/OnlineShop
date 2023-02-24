@@ -23,10 +23,8 @@ app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 app.UseRouting();
-app.UseCors(builder => builder.AllowAnyOrigin());
 
 app.MapBlazorHub();
-app.MapFallbackToPage("/Index");
-
+app.MapFallbackToPage("/_Host");
 
 app.Run();
