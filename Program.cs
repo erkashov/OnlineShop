@@ -9,6 +9,7 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<WeatherForecastService>();
 builder.Services.AddAntDesign();
+builder.Services.AddBootstrapBlazor();
 builder.Services.AddCors();
 
 var app = builder.Build();
