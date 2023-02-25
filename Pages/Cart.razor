@@ -2,13 +2,103 @@
 
 @using OnlineShop.Shared
 @using OnlineShop.Data
-@using BootstrapBlazor.Components
+@using System.Text.Json;
 
 <PageTitle>Корзина</PageTitle>
 
 <h1>
     Корзина
 </h1>
-@code {
 
+<div class="d-flex flex-row">
+    <div class="d-flex flex-column">
+        <Table DataSource="cartProducts" RowClassName="@(_=>"editable-row")" Bordered PaginationPosition="None">
+            <PropertyColumn Property="c=>c.ImagePath" Title="">
+                <Image Src="../src/fanera-fk.jpg" class="product-cart-image"></Image>
+            </PropertyColumn>
+            <PropertyColumn Property="c=>c.ProductName" Title="Товар" Width="200px"></PropertyColumn>
+            <PropertyColumn Width="30%" Property="c=>c.Count" Title="Кол-во" Style="width:150px">
+                @if (editId == context.Id)
+                {
+                    <AntDesign.InputNumber @bind-Value="context.Count" OnBlur="stopEdit" AutoFocus Min="1" Style="width:100px" />
+                }
+                else
+                {
+                    <div class="editable-cell-value-wrap" style="padding-right:24px" @onclick="()=>startEdit(context.Id)">
+                        @context.Count
+                    </div>
+                }
+            </PropertyColumn>
+            <ActionColumn Title="">
+                <Popconfirm Title="Удалить?"
+                            OnConfirm="()=> deleteRow(context.Id)"
+                            OkText="Yes"
+                            CancelText="No">
+                    <a href="/cart">
+                        <Icon Type="close" Theme="outline" class="icons" />
+                    </a>
+                </Popconfirm>
+            </ActionColumn>
+        </Table>
+    </div>
+    <div class="d-flex flex-column cart-itog">
+        <h2>Итого</h2>
+    </div>
+</div>
+
+<style>
+    .editable-cell {
+        position: relative;
+    }
+
+    .editable-cell-value-wrap {
+        padding: 5px 12px;
+        cursor: pointer;
+    }
+
+    .editable-row:hover .editable-cell-value-wrap {
+        padding: 4px 11px;
+        border: 1px solid #d9d9d9;
+        border-radius: 4px;
+    }
+
+    [data-theme='dark'] .editable-row:hover .editable-cell-value-wrap {
+        border: 1px solid #434343;
+    }
+</style>
+
+@code {
+    int i = 0;
+    int? editId;
+
+    ProductCart[] cartProducts = { };
+
+    void addRow()
+    {
+        cartProducts = cartProducts.Append(new ProductCart() { Id = i, ProductName = "Фанера ФК 4/4 12 мм", Count = 10, ImagePath = "../src/fanera-fk.jpg" });
+        i++;
+    }
+
+    void deleteRow(int id)
+    {
+        cartProducts = cartProducts.Where(d => d.Id != id).ToArray();
+    }
+
+    void startEdit(int id)
+    {
+        editId = id;
+    }
+
+    void stopEdit()
+    {
+        var editedData = cartProducts.FirstOrDefault(x => x.Id == editId);
+        Console.WriteLine(JsonSerializer.Serialize(editedData));
+        editId = null;
+    }
+
+    protected override void OnInitialized()
+    {
+        addRow();
+        addRow();
+    }
 }
