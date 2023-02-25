@@ -203,3 +203,12 @@ a:hover {
     gap: 30px;
     margin-left: auto;
 }
+
+.center-div {
+    display: flex;
+    flex-direction: row;
+    padding: 0px;
+    gap: 20px;
+    width: 250px;
+    margin: 0 auto;
+}

@@ -1,0 +1,17 @@
+﻿@page "/auth"
+
+<PageTitle>Авторизация</PageTitle>
+<div class="d-flex flex-column center-div">
+    
+    <h1>Авторизация</h1>
+    <Input  Placeholder="Почта" Type="email" @bind-Value="@Email"/>
+    <Input  Placeholder="Пароль" Type="text" @bind-Value="@Password"/>
+    <Button>Войти</Button>
+    <NavLink href="/sign-up">Регистрация</NavLink>
+
+</div>
+
+@code {
+    public string Email { get; set; }
+    public string Password { get; set; }
+}
