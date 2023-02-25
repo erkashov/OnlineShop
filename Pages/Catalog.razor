@@ -1,0 +1,73 @@
+﻿@page "/catalog/{categoryName?}/{Sort?}"
+
+@using OnlineShop.Shared
+@using OnlineShop.Data
+
+<PageTitle>Каталог </PageTitle>
+
+<h1>
+    Каталог
+</h1>
+<div class="d-flex flex-column">
+
+    @foreach(ProductCategory category in Categories)
+    {
+        string href = "/catalog/" + category.Path;
+        if (category.Path == CategoryName) {
+            <NavLink href=@href class="catalog-selected-category catalog-category">@category.Name</NavLink>
+        }
+        else {
+            <NavLink href=@href class="catalog-category">@category.Name</NavLink>
+        }
+    }
+    
+    @if (CategoryName != null)
+    {
+        <h3>Фильтр</h3>
+        <div class="d-flex flex-column">
+            <p>Сорт</p>
+            @foreach (var sortItem in Sorts)
+            {
+                <Checkbox>@sortItem</Checkbox>
+            }
+        </div>
+    }
+</div>
+
+<CheckboxList TValue="string" Items="@Items" ShowLabel="true" DisplayText="nameof(Foo.Name)" OnSelectedChanged="@OnSelectedChanged" />
+
+
+@code {
+    [Parameter]
+    public string? CategoryName { get; set; }
+
+    [Parameter]
+    public string? Sort { get; set; }
+    public List<string> Sorts = new List<string>() { "1/1", "2/2", "4/4" };
+    public List<ProductCategory> Categories = new List<ProductCategory>() { new ProductCategory() { Name="Фанера ФК", Path="fanera-fk" },
+                                                                            new ProductCategory() { Name="Фанера ФСФ", Path="fanera-fsf" },
+                                                                            new ProductCategory() { Name="ОСБ", Path="osb" },};
+    public List<int> Tolshiny = new List<int>() { 9, 10, 12, 15, 18 };
+
+    private string Value1 { get; set; } = "1,3";
+
+    private IEnumerable<SelectedItem>? Items { get; set; } = new List<SelectedItem>(new List<SelectedItem>
+    {
+        new SelectedItem { Text = "Item 1", Value = "1" },
+        new SelectedItem { Text = "Item 2", Value = "2" , IsDisabled = true },
+        new SelectedItem { Text = "Item 3", Value = "3" },
+        new SelectedItem { Text = "Item 4", Value = "4" },
+    });
+
+    private Task OnSelectedChanged(IEnumerable<SelectedItem> items, string value)
+    {
+        return Task.CompletedTask;
+    }
+
+    class SelectedItem
+    {
+        public string Text { get; set; }
+        public string Value { get; set; }
+        public bool IsDisabled { get; set; } = true;
+    }
+}

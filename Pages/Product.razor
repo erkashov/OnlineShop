@@ -1,0 +1,25 @@
+﻿@page "/product/{Id:int}"
+@using OnlineShop.Shared
+
+<div>
+    <div class="d-flex flex-row nav-bar">
+        <img src="../src/fanera-fk.jpg" class="product-page-image" />
+        <div class="d-flex flex-column">
+            <h1 class="product-page-header">Фанера ФК 1525*1525 4/4 12мм</h1>
+            <span class="product-card-price">9000 руб/лист</span>
+            <Button>В корзину</Button>
+        </div>
+    </div>
+    <Descriptions Title="Характеристики">
+        <DescriptionsItem Title="Размеры">1525*1525</DescriptionsItem>
+        <DescriptionsItem Title="Сорт">ФК 4/4</DescriptionsItem>
+        <DescriptionsItem Title="Толщина">12 мм</DescriptionsItem>
+        <DescriptionsItem Title="Шлифовка">Ш2 (с двух сторрон)</DescriptionsItem>
+    </Descriptions>
+
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+}
