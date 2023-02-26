@@ -212,3 +212,14 @@ a:hover {
     width: 250px;
     margin: 0 auto;
 }
+
+.account {
+    display: flex;
+    gap: 20px;
+    margin-left: auto;
+}
+
+.account-data {
+    display: flex;
+    gap: 10px;
+}
