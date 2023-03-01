@@ -1,20 +1,73 @@
 ﻿@page "/product/{Id:int}"
 @using OnlineShop.Shared
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
 
-<div>
-    <div class="d-flex flex-row nav-bar">
+<div class="d-flex flex-column">
+    <h1 class="product-page-header">@ProductItem.Naim2</h1>
+    <div class="d-flex flex-row product-page-123">
         <img src="../src/fanera-fk.jpg" class="product-page-image" />
         <div class="d-flex flex-column">
-            <h1 class="product-page-header">Фанера ФК 1525*1525 4/4 12мм</h1>
-            <span class="product-card-price">9000 руб/лист</span>
-            <Button>В корзину</Button>
+            <p>Толщина, мм</p>
+            <div class="d-flex flex-row product-page-options">
+                @foreach (var prod in Products)
+                {
+                    string href = "/product/" + prod.ID;
+                    if (prod.ID == Id)
+                    {
+                        <NavLink href=@href>
+                            <Button Type="@ButtonType.Primary" Disabled>
+                                @prod.tol
+                            </Button>
+                        </NavLink>
+                    }
+                    else
+                    {
+                        <NavLink href=@href>
+                            <Button>
+                                @prod.tol
+                            </Button>
+                        </NavLink>
+                    }
+                }
+            </div>
+
+            <p>Сорт</p>
+            <div class="d-flex flex-row product-page-options">
+                @foreach (var prod in Products)
+                {
+                    string href = "/product/" + prod.ID;
+                    if (prod.ID == Id)
+                    {
+                        <NavLink href=@href>
+                            <Button Type="@ButtonType.Primary" Disabled>
+                                @prod.sort
+                            </Button>
+                        </NavLink>
+                    }
+                    else
+                    {
+                        <NavLink href=@href>
+                            <Button>
+                                @prod.sort
+                            </Button>
+                        </NavLink>
+                    }
+                }
+            </div>
+        </div>
+        <div class="d-flex flex-column cart-itog">
+            <span class="product-page-header">@GetPrice()</span>
+            <div class="d-flex flex-row">
+                <AntDesign.InputNumber @bind-Value=@ProductCount OnBlur="stopEdit" Min="1" Style="width:100px" />
+                <Button OnClick=@AddToCart>В корзину</Button>
+            </div>
         </div>
     </div>
     <Descriptions Title="Характеристики">
-        <DescriptionsItem Title="Размеры">1525*1525</DescriptionsItem>
-        <DescriptionsItem Title="Сорт">ФК 4/4</DescriptionsItem>
-        <DescriptionsItem Title="Толщина">12 мм</DescriptionsItem>
-        <DescriptionsItem Title="Шлифовка">Ш2 (с двух сторон)</DescriptionsItem>
+        <DescriptionsItem Title="Размеры">@ProductItem.dlina*@ProductItem.shir</DescriptionsItem>
+        <DescriptionsItem Title="Сорт">@ProductItem.nazn @ProductItem.sort</DescriptionsItem>
+        <DescriptionsItem Title="Толщина">@ProductItem.tol мм</DescriptionsItem>
+        <DescriptionsItem Title="Шлифовка">@ProductItem.dekor</DescriptionsItem>
     </Descriptions>
 
 </div>
@@ -22,4 +75,49 @@
 @code {
     [Parameter]
     public int Id { get; set; }
+
+    public int ProductCount { get; set; } = 1;
+
+    public ShopLib.Product ProductItem { get; set; } = new ShopLib.Product();
+    private List<ShopLib.Product>? Products { get; set; } = new List<ShopLib.Product>();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        ProductItem = (await BaseHttpService<ShopLib.Product>.SendAsync<ShopLib.Product>("Tovary/" + Id, HttpMethod.Get)).FirstOrDefault();
+        await GetProducts();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender) GetProducts();
+    }
+
+    private string GetPrice()
+    {
+        if (ProductItem.Prices != null && ProductItem.Prices.FirstOrDefault() != null)
+        {
+            return ProductItem.Prices?.FirstOrDefault()?.price_nal + " руб/лист";
+        }
+        return "под заказ";
+    }
+
+    private async Task GetProducts()
+    {
+        CategoryFilter filter = new CategoryFilter();
+        filter.CategoryId = ProductItem.categoryID;
+        Products = await BaseHttpService<ShopLib.Product>.SendAsync<ShopLib.Product>("Tovary/Filter", HttpMethod.Post, filter);
+    }
+
+    private async Task AddToCart()
+    {
+        if(ProductCount > 0)
+        {
+            List<ProductCart> productCarts = await localStorage.GetItemAsync< List<ProductCart>>("UserCart");
+            if (productCarts == null) productCarts = new List<ProductCart>();
+            ProductCart? productCart = productCarts.Where(p => p.Product.ID == Id).FirstOrDefault();
+            if (productCart == null) productCarts.Add(new ProductCart() { Count = ProductCount, Id = Id, Product = ProductItem });
+            else productCart.Count += ProductCount;
+            await localStorage.SetItemAsync("UserCart", productCarts);
+        }
+    }
 }

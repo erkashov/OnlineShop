@@ -3,6 +3,9 @@
 @using OnlineShop.Shared
 @using OnlineShop.Data
 @using BootstrapBlazor.Components
+@using System.Collections.ObjectModel
+
+@inject NavigationManager NavigationManager
 
 <PageTitle>Каталог </PageTitle>
 
@@ -13,30 +16,35 @@
 <div class="d-flex flex-row">
     <div class="d-flex flex-column filter-container">
 
-        @foreach (ProductCategory category in Categories)
+        @foreach (Category category in Categories)
         {
-            string href = "/catalog/" + category.Path;
-            if (category.Path == CategoryName)
+            string href = "/catalog/" + category.path;
+            if (category.path == CategoryName)
             {
-                <NavLink href=@href class="catalog-selected-category catalog-category">@category.Name</NavLink>
+                <NavLink href=@href class="catalog-selected-category catalog-category">@category.short_name</NavLink>
             }
             else
             {
-                <NavLink href=@href class="catalog-category">@category.Name</NavLink>
+                <NavLink href=@href class="catalog-category">@category.short_name</NavLink>
             }
         }
 
-        @if (CategoryName != null)
+        @if (CategoryName != null && Categories.Where(p => p.path == CategoryName).FirstOrDefault() != null)
         {
             <h3>Фильтр</h3>
-            <CheckboxList TValue="string" @bind-Value="@Value1" Items="@SortItems" ShowLabel="true" DisplayText="Сорт" ShowBorder='false' IsVertical='true' OnSelectedChanged="@OnSelectedChanged" />
-            <CheckboxList TValue="string" @bind-Value="@Value2" Items="@TolItems" ShowLabel="true" DisplayText="Толщина" ShowBorder='false' IsVertical='true' OnSelectedChanged="@OnSelectedChanged" />
+            <CheckboxList TValue="string" @bind-Value="@SortsFilter" Items="@SortItems" ShowLabel="true" DisplayText="Сорт" ShowBorder='false' IsVertical='true' OnSelectedChanged="@OnSelectedChanged" onclick=@GetProducts/>
+            <CheckboxList TValue="string" @bind-Value="@ThicknessFilter" Items="@TolItems" ShowLabel="true" DisplayText="Толщина" ShowBorder='false' IsVertical='true' onclick=@GetProducts/>
+
         }
     </div>
     <div class="d-flex flex-column">
-        <ListView TItem="Product" Pageable="true" PageItems="21" OnQueryAsync="@OnQueryAsync">
+        <ListView TItem="ShopLib.Product" Items="@Products">
             <BodyTemplate>
-                <ProductCardComponent Id="1"></ProductCardComponent>
+                <BootstrapBlazor.Components.Card>
+                     <BodyTemplate>
+                        <ProductCardComponent Id="@context.ID"></ProductCardComponent>
+                     </BodyTemplate>
+                </BootstrapBlazor.Components.Card>
             </BodyTemplate>
         </ListView>
     </div>
@@ -48,48 +56,89 @@
     [Parameter]
     public string? CategoryName { get; set; }
 
-    public List<string> Sorts = new List<string>() { "1/1", "2/2", "4/4" };
-    public List<int> Tolshiny = new List<int>() { 9, 10, 12, 15, 18 };
-    public List<ProductCategory> Categories = new List<ProductCategory>() { new ProductCategory() { Name="Фанера ФК", Path="fanera-fk" },
-        new ProductCategory() { Name="Фанера ФСФ", Path="fanera-fsf" },
-        new ProductCategory() { Name="ОСБ", Path="osb" },};
 
-    public string Value1 { get; set; } = "";
-    public string Value2 { get; set; } = "";
+    public int myId { get; set; }
+
+    public List<Category> Categories = new List<Category>();
+    public CategoryFilter CategoryFilter { get; set; } = new CategoryFilter();
+    public Category? SelectedCategory;
+
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "SortsFilter")]
+    public string SortsFilter { get; set; } = "";
+
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "ThicknessFilter")]
+    public string ThicknessFilter { get; set; } = "";
 
     private List<SelectedItem>? SortItems { get; set; } = new List<SelectedItem>();
     private List<SelectedItem>? TolItems { get; set; } = new List<SelectedItem>();
 
-    private IEnumerable<Product>? Products { get; set; }
+    private ObservableCollection<ShopLib.Product>? Products { get; set; }
 
     public Catalog()
     {
-        foreach (var item in Sorts)
-        {
-            SortItems.Add(new SelectedItem { Text = item, Value = item });
-        }
-        foreach (var item in Tolshiny)
-        {
-            TolItems.Add(new SelectedItem { Text = item.ToString() + " мм", Value = item.ToString() });
-        }
-        Products = Enumerable.Range(1, 100).Select(i => new Product()
-        {
-            
-        });
     }
 
-    private Task OnSelectedChanged(IEnumerable<SelectedItem> items, string value)
+    protected override void OnInitialized()
     {
+        base.OnInitialized();
+        GetProducts();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        Categories = await BaseHttpService<Category>.SendAsync<Category>("Categories", HttpMethod.Get);
+        if (CategoryName != null)
+        {
+            SelectedCategory = Categories.Where(p => p.path == CategoryName).FirstOrDefault();
+            if (SelectedCategory == null) NavigationManager.NavigateTo("/catalog");
+            else
+            {
+                CategoryFilter = (await BaseHttpService<CategoryFilter>.SendAsync<CategoryFilter>
+                    ("Categories/CategoryFilter?id=" + SelectedCategory.ID, HttpMethod.Get)).FirstOrDefault();
+                SortItems = new List<SelectedItem>();
+                TolItems = new List<SelectedItem>();
+                if (CategoryFilter != null)
+                {
+                    if (CategoryFilter.ProductsSorts != null)
+                    {
+                        foreach (var item in CategoryFilter.ProductsSorts)
+                        {
+                            SortItems.Add(new SelectedItem { Text = item, Value = item });
+                        }
+                    }
+                    if (CategoryFilter.ProductsThickness != null)
+                    {
+                        foreach (var item in CategoryFilter.ProductsThickness)
+                        {
+                            TolItems.Add(new SelectedItem { Text = item.ToString() + " мм", Value = item.ToString() });
+                        }
+                    }
+                }
+                await GetProducts();
+            }
+        }
+        else
+        {
+            await GetProducts();
+        }
+    }
+
+    private async Task<Task> OnSelectedChanged(IEnumerable<SelectedItem> items, string value)
+    {
+        //NavigationManager.NavigateTo("/catalog/" + SelectedCategory.path + "?SortsFilter=" + SortsFilter + "&ThicknessFilter=" + ThicknessFilter, true, true);
+        await GetProducts();
         return Task.CompletedTask;
     }
 
-    private Task<QueryData<Product>> OnQueryAsync(QueryPageOptions options)
+    private async Task GetProducts()
     {
-        var items = Products.Skip((options.PageIndex - 1) * options.PageItems).Take(options.PageItems);
-        return Task.FromResult(new QueryData<Product>()
-        {
-            Items = items,
-            TotalCount = Products.Count()
-        });
+        //Products = new ObservableCollection<ShopLib.Product>();
+        CategoryFilter filter = new CategoryFilter();
+        filter.ProductsThickness = TolItems?.Where(p => p.Active == true).Select(p => Convert.ToDouble(p.Value)).ToList();
+        filter.ProductsSorts = SortItems?.Where(p => p.Active == true).Select(p => p.Value).ToList();
+        filter.CategoryId = SelectedCategory != null ? SelectedCategory.ID : 0;
+        Products = new ObservableCollection<ShopLib.Product>(await BaseHttpService<ShopLib.Product>.SendAsync<ShopLib.Product>("Tovary/Filter", HttpMethod.Post, filter));
     }
 }

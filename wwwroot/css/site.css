@@ -200,7 +200,7 @@ a:hover {
     flex-direction: row;
     align-items: center;
     padding: 0px;
-    gap: 30px;
+    gap: 20px;
     margin-left: auto;
 }
 
@@ -222,4 +222,18 @@ a:hover {
 .account-data {
     display: flex;
     gap: 10px;
+}
+
+.product-page-options {
+    display: flex;
+    flex-direction: row;
+    padding: 0px;
+    gap: 5px;
+}
+
+.product-page-123 {
+    padding: 0px;
+    gap: 30px;
+    margin-bottom: 20px;
+    margin-top: 20px;
 }

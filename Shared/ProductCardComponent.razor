@@ -1,10 +1,30 @@
 ﻿<div class="product-card">
-    <img src="../src/fanera-fk.jpg" class="product-card-image"/>
-    <span class="product-card-price">9000 руб/лист</span>
-    <NavLink href="product/2" class="product-card-price" >Фанера ФК 1525*1525 4/4 12мм</NavLink>
+    <img src="../src/fanera-fk.jpg" class="product-card-image" />
+    <span class="product-card-price">@GetPrice()</span>
+    <NavLink href=@GetHref() class="product-card-price">@Product.Naim2</NavLink>
     <Button>В корзину</Button>
 </div>
 @code {
     [Parameter]
     public int Id { get; set; }
+    public Product Product { get; set; } = new Product();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        Product = (await BaseHttpService<Product>.SendAsync<Product>("Tovary/" + Id, HttpMethod.Get)).FirstOrDefault();
+    }
+
+    private string GetPrice()
+    {
+        if(Product.Prices != null  && Product.Prices.FirstOrDefault()!= null)
+        {
+            return Product.Prices?.FirstOrDefault()?.price_nal + " руб/лист";
+        }
+        return "под заказ";
+    }
+
+    private string GetHref()
+    {
+        return "product/" + Product.ID;
+    }
 }

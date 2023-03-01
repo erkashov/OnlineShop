@@ -21,4 +21,10 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.3.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="ShopLib">
+      <HintPath>..\Api\ShopLib\bin\Debug\net6.0\ShopLib.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

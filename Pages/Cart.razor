@@ -4,6 +4,8 @@
 @using OnlineShop.Data
 @using System.Text.Json;
 
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+
 <PageTitle>Корзина</PageTitle>
 
 <h1>
@@ -12,26 +14,28 @@
 
 <div class="d-flex flex-row">
     <div class="d-flex flex-column">
-        <Table DataSource="cartProducts" RowClassName="@(_=>"editable-row")" Bordered PaginationPosition="None">
+        <Table DataSource="ProductCarts" RowClassName="@(_=>"editable-row")" Bordered PaginationPosition="None">
             <PropertyColumn Property="c=>c.ImagePath" Title="">
                 <Image Src="../src/fanera-fk.jpg" class="product-cart-image"></Image>
             </PropertyColumn>
-            <PropertyColumn Property="c=>c.ProductName" Title="Товар" Width="200px"></PropertyColumn>
+            <PropertyColumn Property="c=>c.Product.Naim2" Title="Товар" Width="200px">
+                <NavLink href=@context.Product.Link>@context.Product.Naim2</NavLink>
+            </PropertyColumn>
             <PropertyColumn Width="30%" Property="c=>c.Count" Title="Кол-во" Style="width:150px">
                 @if (editId == context.Id)
                 {
-                    <AntDesign.InputNumber @bind-Value="context.Count" OnBlur="stopEdit" AutoFocus Min="1" Style="width:100px" />
+                    <Input Type="number" @bind-Value="context.Count" OnBlur="stopEdit" AutoFocus Min="1" Style="width:100px" />
                 }
                 else
                 {
-                    <div class="editable-cell-value-wrap" style="padding-right:24px" @onclick="()=>startEdit(context.Id)">
+                    <div class="editable-cell-value-wrap" style="padding-right:24px" @onclick="()=>StartEdit(context.Id)">
                         @context.Count
                     </div>
                 }
             </PropertyColumn>
             <ActionColumn Title="">
                 <Popconfirm Title="Удалить?"
-                            OnConfirm="()=> deleteRow(context.Id)"
+                            OnConfirm="()=> DeleteRow(context.Id)"
                             OkText="Yes"
                             CancelText="No">
                     <a href="/cart">
@@ -71,34 +75,38 @@
     int i = 0;
     int? editId;
 
-    ProductCart[] cartProducts = { };
+    List<ProductCart> ProductCarts { get; set; } = new List<ProductCart>();
 
-    void addRow()
+    //protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override async Task OnInitializedAsync()
     {
-        cartProducts = cartProducts.Append(new ProductCart() { Id = i, ProductName = "Фанера ФК 4/4 12 мм", Count = 10, ImagePath = "../src/fanera-fk.jpg" });
-        i++;
+        ProductCarts = await localStorage.GetItemAsync<List<ProductCart>>("UserCart");
     }
 
-    void deleteRow(int id)
+    private async Task DeleteRow(int id)
     {
-        cartProducts = cartProducts.Where(d => d.Id != id).ToArray();
+        ProductCarts = ProductCarts.Where(d => d.Id != id).ToList();
+        await SetCart();
     }
 
-    void startEdit(int id)
+    private async Task StartEdit(int id)
     {
         editId = id;
     }
 
     void stopEdit()
     {
-        var editedData = cartProducts.FirstOrDefault(x => x.Id == editId);
-        Console.WriteLine(JsonSerializer.Serialize(editedData));
+        var editedData = ProductCarts.FirstOrDefault(x => x.Id == editId);
         editId = null;
+        SetCart();
     }
 
     protected override void OnInitialized()
     {
-        addRow();
-        addRow();
+    }
+
+    private async Task SetCart()
+    {
+        await localStorage.SetItemAsync("UserCart", ProductCarts);
     }
 }
