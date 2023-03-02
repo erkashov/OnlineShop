@@ -14,28 +14,10 @@
     [Parameter]
     public EventCallback<User> UserNullCallback { get; set; }
 
-    [Parameter]
-    public StateRoleNavBar? StateRoleNavBar { get; set; } = new();
-
-    [Parameter]
-    public EventCallback<StateRoleNavBar> StateRoleNavBarCallback { get; set; }
-
     public void SetUser(User? user)
     {
         CurrentUser = user;
         RoleCallback.InvokeAsync(user);
-    }
-
-    public void SetUserNull()
-    {
-        CurrentUser = null;
-        UserNullCallback.InvokeAsync();
-    }
-
-    public void SetStateRoleNavBar(StateRoleNavBar roleNavBar)
-    {
-        StateRoleNavBar = roleNavBar;
-        StateRoleNavBarCallback.InvokeAsync(roleNavBar);
     }
 }
  
