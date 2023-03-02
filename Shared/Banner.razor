@@ -1,0 +1,33 @@
+﻿<div class="inline">
+    <a href=@Link>
+
+        <div class="d-flex flex-row promo-banner">
+            <div class="d-flex flex-column promo-banner-content">
+                <h2>@Header</h2>
+                <h6>@Description</h6>
+            </div>
+            <img class="promo-banner-image" src=@ImageLink />
+        </div>
+    </a>
+</div>
+
+@code {
+    [Parameter]
+    public string Header { get; set; }
+
+    [Parameter]
+    public string Description { get; set; }
+
+    [Parameter]
+    public string ImageLink { get; set; }
+
+    [Parameter]
+    public string Link { get; set; }
+    public Banner()
+    {
+        Header = "Заголовок";
+        Description = "Описание";
+        ImageLink = "";
+        Link = "/";
+    }
+}

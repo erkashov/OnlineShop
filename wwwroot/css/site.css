@@ -8,6 +8,11 @@ h1:focus {
     outline: none;
 }
 
+h1, h2, h3, h4 {
+    color: #1b1f2a;
+    font-weight: 800;
+}
+
 a, .btn-link {
     color: #0071c1;
 }
@@ -72,14 +77,15 @@ a, .btn-link {
     height: 50px;
     width: 250px;
 }
+
 a {
     text-decoration: none;
     color: #000000;
 }
 
-a:hover {
-    color: #07DA5F;
-}
+    a:hover {
+        color: #07DA5F;
+    }
 
 /*.catalog {
     display: flex;
@@ -90,13 +96,13 @@ a:hover {
     gap: 10px;
     width: 180px;
     height: 54px;*/
-    /* orange */
+/* orange */
 
-    /*background: #07DA5F;
+/*background: #07DA5F;
     border-radius: 12px;*/
-    /* Inside auto layout */
+/* Inside auto layout */
 
-    /*flex: none;
+/*flex: none;
     order: 1;
     flex-grow: 0;
 }*/
@@ -133,16 +139,16 @@ a:hover {
     margin-left: auto;
 }
 
-.carousel-banner-item{
-    border-radius : 12px;
+.carousel-banner-item {
+    border-radius: 12px;
 }
 
 .product-card {
     display: flex;
-    max-width: 200px;
+    width: 200px;
     margin: 10px;
     flex-direction: column;
-    justify-content: center;
+    justify-content: start;
     align-items: flex-start;
     padding: 0px;
     gap: 10px;
@@ -160,12 +166,12 @@ a:hover {
     height: auto;
 }
 
-.sales-hits-container{
+.sales-hits-container {
     margin: 10px 00px;
 }
 
-.product-card-price{
-    font-weight : 600;
+.product-card-price {
+    font-weight: 600;
     font-size: large;
 }
 
@@ -177,14 +183,14 @@ a:hover {
 
 .catalog-selected-category {
     color: #07DA5F;
-    font-weight:600;
+    font-weight: 600;
 }
 
-.catalog-category{
-    font-size : medium;
+.catalog-category {
+    font-size: medium;
 }
 
-.filter-container{
+.filter-container {
     width: 250px;
     min-width: 250px;
 }
@@ -236,4 +242,47 @@ a:hover {
     gap: 30px;
     margin-bottom: 20px;
     margin-top: 20px;
+}
+
+
+.div-flex-1 {
+    flex-grow: 1;
+    max-width: calc(100% - 10px);
+    overflow: scroll;
+}
+
+.inline {
+    display: inline-block;
+}
+
+.promo-banner {
+    display: flex;
+    flex-direction: column;
+    padding: 0px;
+    margin: 10px 10px;
+    border-radius: 12px;
+    background: rgb(7,218,95);
+    background: linear-gradient(90deg, rgba(7,218,95,1) 0%, rgba(13,213,116,1) 42%, rgba(18,208,133,1) 69%);
+    align-items: flex-start;
+    min-height: 200px;
+    padding: 20px 0px 20px 30px;
+    min-width: 400px;
+    width: 500px;
+}
+
+.promo-banner-content {
+    max-width: calc(60% - 10px);
+}
+
+.promo-banner-image {
+    width: calc(40% - 10px);
+    height: calc(100% - 10px);
+    max-height: 200px;
+    max-width: 200px;
+    border-radius: 12px;
+    margin-left: auto;
+}
+
+.promo-banner-content > h2 {
+    color: #000000;
 }
