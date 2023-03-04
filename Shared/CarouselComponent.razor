@@ -1,42 +1,19 @@
-﻿@using OnlineShop.Data;
+﻿@using BootstrapBlazor.Components
+@using OnlineShop.Data;
 
-<div id="carouselBanner" class="carousel slide" data-ride="carousel">
-    <div class="carousel-inner carousel-banner-item">
-        @for (int i = 0; i < Banners.Count; i++)
+<BootstrapBlazor.Components.Carousel ShowControls="true" ShowIndicators="true">
+    @foreach(var banner in Banners)
         {
-            if (i == 0)
-            {
-                <div class="carousel-item active" data-bs-interval="10000">
-                    <OnlineShop.Shared.MainPage.PromoBanner Header=@Banners[i].Header
-                                                    Description=@Banners[i].Description
-                                                    ImageLink=@Banners[i].ImageLink
-                                                    Link=@Banners[i].Link
-                                                    LinkHeader=@Banners[i].LinkHeader>
+            <CarouselItem>
+                    <OnlineShop.Shared.MainPage.PromoBanner Header=@banner.Header
+                                                    Description=@banner.Description
+                                                    ImageLink=@banner.ImageLink
+                                                    Link=@banner.Link
+                                                    LinkHeader=@banner.LinkHeader>
                     </OnlineShop.Shared.MainPage.PromoBanner>
-                </div>
-            }
-            else
-            {
-                <div class="carousel-item carousel-banner-item" data-bs-interval="10000">
-                    <OnlineShop.Shared.MainPage.PromoBanner Header=@Banners[i].Header
-                                                    Description=@Banners[i].Description
-                                                    ImageLink=@Banners[i].ImageLink
-                                                    Link=@Banners[i].Link
-                                                    LinkHeader=@Banners[i].LinkHeader>
-                    </OnlineShop.Shared.MainPage.PromoBanner>
-                </div>
-            }
+            </CarouselItem>
         }
-    </div>
-    <button class="carousel-control-prev" type="button" data-bs-target="#carouselBanner" data-bs-slide="prev">
-        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">Предыдущий</span>
-    </button>
-    <button class="carousel-control-next" type="button" data-bs-target="#carouselBanner" data-bs-slide="next">
-        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">Следующий</span>
-    </button>
-</div>
+</BootstrapBlazor.Components.Carousel>
 
 @code {
     List<BannerData> Banners { get; set; } = new List<BannerData>();

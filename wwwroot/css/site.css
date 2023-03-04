@@ -83,26 +83,27 @@ a {
     color: #000000;
 }
 
+    a:hover {
+        color: #07DA5F;
+    }
 
-/*.catalog {
+.catalog-btn {
     display: flex;
     flex-direction: row;
     justify-content: center;
     align-items: center;
-    padding: 0px;
-    gap: 10px;
-    width: 180px;
-    height: 54px;*/
-/* orange */
-
-/*background: #07DA5F;
-    border-radius: 12px;*/
-/* Inside auto layout */
-
-/*flex: none;
+    padding: 3px 10px ;
+    background: #07DA5F;
+    border-radius: 12px;
+    flex: none;
     order: 1;
     flex-grow: 0;
-}*/
+    font-size: x-large;
+}
+
+    .catalog-btn:hover {
+        color: #fff;
+    }
 
 .nav-bar-btn {
     display: flex;
@@ -308,4 +309,7 @@ a {
 
 .promo-banner-content > h2 {
     color: #000000;
+}
+button {
+    border-radius: 12px;
 }

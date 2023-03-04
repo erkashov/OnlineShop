@@ -15,9 +15,9 @@
                     if (prod.ID == Id)
                     {
                         <NavLink href=@href>
-                            <Button Type="@ButtonType.Primary" Disabled>
+                            <BootstrapBlazor.Components.Button Type="@ButtonType.Primary" Disabled>
                                 @prod.tol
-                            </Button>
+                            </BootstrapBlazor.Components.Button>
                         </NavLink>
                     }
                     else
@@ -39,17 +39,17 @@
                     if (prod.ID == Id)
                     {
                         <NavLink href=@href>
-                            <Button Type="@ButtonType.Primary" Disabled>
+                            <BootstrapBlazor.Components.Button Type="@ButtonType.Primary" Disabled>
                                 @prod.sort
-                            </Button>
+                            </BootstrapBlazor.Components.Button>
                         </NavLink>
                     }
                     else
                     {
                         <NavLink href=@href>
-                            <Button>
+                            <BootstrapBlazor.Components.Button>
                                 @prod.sort
-                            </Button>
+                            </BootstrapBlazor.Components.Button>
                         </NavLink>
                     }
                 }
