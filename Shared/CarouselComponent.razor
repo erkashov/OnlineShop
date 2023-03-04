@@ -1,17 +1,34 @@
-﻿<div id="carouselBanner" class="carousel slide" data-ride="carousel">
-  <div class="carousel-indicators">
-        <button type="button" data-bs-target="#carouselBanner" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
-        <button type="button" data-bs-target="#carouselBanner" data-bs-slide-to="1" aria-label="Slide 2"></button>
+﻿@using OnlineShop.Data;
+
+<div id="carouselBanner" class="carousel slide" data-ride="carousel">
+    <div class="carousel-inner carousel-banner-item">
+        @for (int i = 0; i < Banners.Count; i++)
+        {
+            if (i == 0)
+            {
+                <div class="carousel-item active" data-bs-interval="10000">
+                    <OnlineShop.Shared.MainPage.PromoBanner Header=@Banners[i].Header
+                                                    Description=@Banners[i].Description
+                                                    ImageLink=@Banners[i].ImageLink
+                                                    Link=@Banners[i].Link
+                                                    LinkHeader=@Banners[i].LinkHeader>
+                    </OnlineShop.Shared.MainPage.PromoBanner>
+                </div>
+            }
+            else
+            {
+                <div class="carousel-item carousel-banner-item" data-bs-interval="10000">
+                    <OnlineShop.Shared.MainPage.PromoBanner Header=@Banners[i].Header
+                                                    Description=@Banners[i].Description
+                                                    ImageLink=@Banners[i].ImageLink
+                                                    Link=@Banners[i].Link
+                                                    LinkHeader=@Banners[i].LinkHeader>
+                    </OnlineShop.Shared.MainPage.PromoBanner>
+                </div>
+            }
+        }
     </div>
-  <div class="carousel-inner carousel-banner-item">
-    <div class="carousel-item active" data-bs-interval="10000">
-      <img src="../src/fanera_banner.png" class="d-block w-100" alt="">
-    </div>
-    <div class="carousel-item carousel-banner-item" data-bs-interval="10000">
-      <img src="../src/raspil_banner.png" class="d-block w-100" alt="">
-    </div>
-  </div>
-  <button class="carousel-control-prev" type="button" data-bs-target="#carouselBanner" data-bs-slide="prev">
+    <button class="carousel-control-prev" type="button" data-bs-target="#carouselBanner" data-bs-slide="prev">
         <span class="carousel-control-prev-icon" aria-hidden="true"></span>
         <span class="visually-hidden">Предыдущий</span>
     </button>
@@ -22,5 +39,25 @@
 </div>
 
 @code {
+    List<BannerData> Banners { get; set; } = new List<BannerData>();
 
+    public CarouselComponent()
+    {
+        Banners.Add(new BannerData()
+            {
+                Header = "Все виды фанеры по низким ценам",
+                Description = "Большой выбор фанеры, ОСБ, ДВП, ДСП в наличии и под заказ",
+                ImageLink = "../src/banner-fanera.jpg",
+                Link = "/catalog",
+                LinkHeader = "Каталог"
+            });
+        Banners.Add(new BannerData()
+            {
+                Header = "Распил материала",
+                Description = "Услуги по качественному распилу деревянных изделий и листового материала - в строгом соответствии с требованиями заказчика",
+                ImageLink = "../src/banner-fanera.jpg",
+                Link = "https://faneradarom.usite.pro/index/raspil_materiala/0-11",
+                LinkHeader = "Прайс"
+            });
+    }
 }

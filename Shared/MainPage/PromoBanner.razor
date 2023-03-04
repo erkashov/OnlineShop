@@ -1,0 +1,36 @@
+﻿ <div class="d-flex flex-row promo-banner-main">
+            <div class="d-flex flex-column promo-banner-main-content">
+                <h2>@Header</h2>
+                <h5>@Description</h5>
+    <a href=@Link>
+        <Button>@LinkHeader</Button>
+    </a>
+
+            </div>
+            <img class="promo-banner-main-image" src=@ImageLink />
+</div>
+
+@code {
+    [Parameter]
+    public string Header { get; set; }
+
+    [Parameter]
+    public string Description { get; set; }
+
+    [Parameter]
+    public string ImageLink { get; set; }
+
+    [Parameter]
+    public string Link { get; set; }
+    
+    [Parameter]
+    public string LinkHeader { get; set; }
+    public PromoBanner()
+    {
+        Header = "Заголовок";
+        Description = "Описание";
+        ImageLink = "";
+        Link = "/";
+        LinkHeader = "Смотреть";
+    }
+}
