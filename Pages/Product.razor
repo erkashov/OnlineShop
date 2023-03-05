@@ -1,5 +1,7 @@
 ﻿@page "/product/{Id:int}"
 @using OnlineShop.Shared
+@using BootstrapBlazor.Components
+@inject NavigationManager NavigationManager
 @inject Blazored.LocalStorage.ILocalStorageService localStorage
 
 <div class="d-flex flex-column">
@@ -7,59 +9,36 @@
     <div class="d-flex flex-row product-page-123">
         <img src="../src/fanera-fk.jpg" class="product-page-image" />
         <div class="d-flex flex-column">
-            <p>Толщина, мм</p>
-            <div class="d-flex flex-row product-page-options">
-                @foreach (var prod in Products)
-                {
-                    string href = "/product/" + prod.ID;
-                    if (prod.ID == Id)
-                    {
-                        <NavLink href=@href>
-                            <BootstrapBlazor.Components.Button Type="@ButtonType.Primary" Disabled>
-                                @prod.tol
-                            </BootstrapBlazor.Components.Button>
-                        </NavLink>
-                    }
-                    else
-                    {
-                        <NavLink href=@href>
-                            <Button>
-                                @prod.tol
-                            </Button>
-                        </NavLink>
-                    }
-                }
-            </div>
+            @if (ThicknessList.Count > 1)
+            {
+                <p>Толщина</p>
+                <div class="d-flex flex-row product-page-options">
+                    <RadioList TValue="double" IsButton="true" Items="@TolItems" Value="@ProductItem.tol"
+                           Color="BootstrapBlazor.Components.Color.Success" OnSelectedChanged="@OnSelectedChanged"></RadioList>
+                </div>
 
-            <p>Сорт</p>
-            <div class="d-flex flex-row product-page-options">
-                @foreach (var prod in Products)
-                {
-                    string href = "/product/" + prod.ID;
-                    if (prod.ID == Id)
-                    {
-                        <NavLink href=@href>
-                            <BootstrapBlazor.Components.Button Type="@ButtonType.Primary" Disabled>
-                                @prod.sort
-                            </BootstrapBlazor.Components.Button>
-                        </NavLink>
-                    }
-                    else
-                    {
-                        <NavLink href=@href>
-                            <BootstrapBlazor.Components.Button>
-                                @prod.sort
-                            </BootstrapBlazor.Components.Button>
-                        </NavLink>
-                    }
-                }
-            </div>
+            }
+            @if (SortsList.Count > 1)
+            {
+                <p>Сорт</p>
+                <div class="d-flex flex-row product-page-options">
+                    <RadioList TValue="string" IsButton="true" Items="@SortItems" Value="@ProductItem.sort"
+                           Color="BootstrapBlazor.Components.Color.Success" OnSelectedChanged="@OnSelectedChangedSort"></RadioList>
+                </div>
+            }
         </div>
         <div class="d-flex flex-column cart-itog">
             <span class="product-page-header">@GetPrice()</span>
+            <BootstrapInputNumber @bind-Value="@ProductCount" Min="1" Style="width:100px" />
             <div class="d-flex flex-row">
-                <AntDesign.InputNumber @bind-Value=@ProductCount OnBlur="stopEdit" Min="1" Style="width:100px" />
-                <Button OnClick=@AddToCart>В корзину</Button>
+                @if (IsAvailable)
+                {
+                    <BootstrapBlazor.Components.Button IsAsync="true" OnClick="@AddToCart" class="product-cart-btn">В корзину</BootstrapBlazor.Components.Button>
+                }
+                else
+                {
+                    <BootstrapBlazor.Components.Button IsDisabled="true" class="product-cart-btn">Под заказ</BootstrapBlazor.Components.Button>
+                }
             </div>
         </div>
     </div>
@@ -75,14 +54,23 @@
 @code {
     [Parameter]
     public int Id { get; set; }
-
+    public bool IsAvailable { get; set; } = true;
     public int ProductCount { get; set; } = 1;
 
     public ShopLib.Product ProductItem { get; set; } = new ShopLib.Product();
     private List<ShopLib.Product>? Products { get; set; } = new List<ShopLib.Product>();
+    private List<double>? ThicknessList { get; set; } = new List<double>();
+    private List<string>? SortsList { get; set; } = new List<string>();
+    private double SelectedThickness { get; set; }
+    private string SelectedSort { get; set; }
+
+    private List<SelectedItem>? SortItems { get; set; } = new List<SelectedItem>();
+    private List<SelectedItem>? TolItems { get; set; } = new List<SelectedItem>();
+
 
     protected override async Task OnParametersSetAsync()
     {
+        IsAvailable = Id % 2 == 0;
         ProductItem = (await BaseHttpService<ShopLib.Product>.SendAsync<ShopLib.Product>("Tovary/" + Id, HttpMethod.Get)).FirstOrDefault();
         await GetProducts();
     }
@@ -106,18 +94,66 @@
         CategoryFilter filter = new CategoryFilter();
         filter.CategoryId = ProductItem.categoryID;
         Products = await BaseHttpService<ShopLib.Product>.SendAsync<ShopLib.Product>("Tovary/Filter", HttpMethod.Post, filter);
+        ThicknessList = Products.Select(p => p.tol).Distinct().ToList();
+        SortsList = Products.Select(p => p.sort).Distinct().ToList();
+        SortItems = new List<SelectedItem>();
+        TolItems = new List<SelectedItem>();
+        if (SortsList != null)
+        {
+            foreach (var item in SortsList)
+            {
+                SortItems.Add(new SelectedItem { Text = item, Value = item });
+            }
+        }
+        if (ThicknessList != null)
+        {
+            foreach (var item in ThicknessList)
+            {
+                TolItems.Add(new SelectedItem { Text = item.ToString() + " мм", Value = item.ToString() });
+            }
+        }
     }
 
     private async Task AddToCart()
     {
-        if(ProductCount > 0)
+        if (ProductCount > 0)
         {
-            List<ProductCart> productCarts = await localStorage.GetItemAsync< List<ProductCart>>("UserCart");
+            List<ProductCart> productCarts = await localStorage.GetItemAsync<List<ProductCart>>("UserCart");
             if (productCarts == null) productCarts = new List<ProductCart>();
             ProductCart? productCart = productCarts.Where(p => p.Product.ID == Id).FirstOrDefault();
             if (productCart == null) productCarts.Add(new ProductCart() { Count = ProductCount, Id = Id, Product = ProductItem });
             else productCart.Count += ProductCount;
             await localStorage.SetItemAsync("UserCart", productCarts);
+        }
+    }
+
+    private async Task<Task> OnSelectedChanged(IEnumerable<SelectedItem> items, double value)
+    {
+        await SetProduct(value, ProductItem.sort);
+        return Task.CompletedTask;
+    }
+
+    private async Task<Task> OnSelectedChangedSort(IEnumerable<SelectedItem> items, string value)
+    {
+        await SetProduct(ProductItem.tol, value);
+        return Task.CompletedTask;
+    }
+
+    private async Task SetProduct(double thickness, string sort)
+    {
+        var prod = Products?.Where(p => p.tol == thickness && p.sort == sort).FirstOrDefault();
+        if (prod == null)
+        {
+            prod = Products?.Where(p => p.sort == sort).FirstOrDefault();
+            if (prod == null)
+            {
+                prod = Products?.FirstOrDefault();
+            }
+        }
+
+        if (prod != null)
+        {
+            NavigationManager.NavigateTo(prod.Link);
         }
     }
 }

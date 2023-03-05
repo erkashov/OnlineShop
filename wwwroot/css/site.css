@@ -144,6 +144,7 @@ a {
 .product-card {
     display: flex;
     width: 200px;
+    height: 350px;
     margin: 10px;
     flex-direction: column;
     justify-content: start;
@@ -197,6 +198,10 @@ a {
     border-radius: 12px;
     width: 100px;
     height: 100px;
+}
+
+.product-cart-btn {
+    margin-top: auto;
 }
 
 .cart-itog {
@@ -288,7 +293,7 @@ a {
 
 .promo-banner-main-content {
     margin: 10% 0 0 0;
-    max-width: calc(60% - 10px);
+    width: calc(60% - 10px);
 }
 
 .promo-banner-image {
@@ -310,6 +315,14 @@ a {
 .promo-banner-content > h2 {
     color: #000000;
 }
-button {
+.btn {
     border-radius: 12px;
+    background: #07DA5F;
+    border: 0;
+}
+
+.btn-white {
+    border-radius: 12px;
+    background: #3d5af1;
+    border: 0;
 }

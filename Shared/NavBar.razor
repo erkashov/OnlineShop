@@ -3,15 +3,17 @@
         <a class="logo" href="/"></a>
     </div>
     <div>
-        <NavLink href="/catalog" class="catalog-btn">Каталог</NavLink>
+        <NavLink href="/catalog">
+            <BootstrapBlazor.Components.Button>Каталог</BootstrapBlazor.Components.Button>
+        </NavLink>
     </div>
     <div>
         <Search Placeholder="Поиск" WrapperStyle="width: 200px;" ClassicSearchIcon />
     </div>
-    <div class="d-flex flex-row child">    
-        <div> 
+    <div class="d-flex flex-row child">
+        <div>
             <a href="/cart">
-                <Icon Type="shopping-cart" Theme="outline" class="icons"/>
+                <Icon Type="shopping-cart" Theme="outline" class="icons" />
             </a>
         </div>
         <div>

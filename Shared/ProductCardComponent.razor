@@ -1,13 +1,23 @@
-﻿<div class="product-card">
+﻿@inject Blazored.LocalStorage.ILocalStorageService localStorage
+
+<div class="product-card">
     <img src="../src/fanera-fk.jpg" class="product-card-image" />
     <span class="product-card-price">@GetPrice()</span>
     <NavLink href=@GetHref() class="product-card-price">@Product.Naim2</NavLink>
-    <BootstrapBlazor.Components.Button>В корзину</BootstrapBlazor.Components.Button>
+    @if (IsAvailable)
+    {
+        <BootstrapBlazor.Components.Button IsAsync="true" OnClick="@AddToCart" class="product-cart-btn">В корзину</BootstrapBlazor.Components.Button>
+    }
+    else
+    {
+        <BootstrapBlazor.Components.Button IsDisabled="true" class="product-cart-btn">Под заказ</BootstrapBlazor.Components.Button>
+    }
 </div>
 @code {
     [Parameter]
     public int Id { get; set; }
     public Product Product { get; set; } = new Product();
+    public bool IsAvailable { get; set; } = true;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -16,15 +26,29 @@
 
     private string GetPrice()
     {
-        if(Product.Prices != null  && Product.Prices.FirstOrDefault()!= null)
+        if (Product.Prices != null && Product.Prices.FirstOrDefault() != null)
         {
+            IsAvailable = true;
             return Product.Prices?.FirstOrDefault()?.price_nal + " руб/лист";
         }
-        return "под заказ";
+        IsAvailable = false;
+        return "уточняйте у менеджера";
     }
 
     private string GetHref()
     {
         return "product/" + Product.ID;
+    }
+
+
+    private async Task AddToCart()
+    {
+        List<ProductCart> productCarts = await localStorage.GetItemAsync<List<ProductCart>>("UserCart");
+        if (productCarts == null) productCarts = new List<ProductCart>();
+        ProductCart? productCart = productCarts.Where(p => p.Product.ID == Id).FirstOrDefault();
+        if (productCart == null) productCarts.Add(new ProductCart() { Count = 1, Id = Id, Product = Product });
+        else productCart.Count += 1;
+        await localStorage.SetItemAsync("UserCart", productCarts);
+        await Task.Delay(1000);
     }
 }
