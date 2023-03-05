@@ -4,6 +4,7 @@
 @using OnlineShop.Data
 @using System.Text.Json;
 
+@inject NavigationManager NavigationManager
 @inject Blazored.LocalStorage.ILocalStorageService localStorage
 
 <PageTitle>Корзина</PageTitle>
@@ -13,7 +14,7 @@
 </h1>
 
 <div class="d-flex flex-row">
-    <div class="d-flex flex-column">
+    <div class="d-flex flex-column gap-20">
         <Table DataSource="ProductCarts" RowClassName="@(_=>"editable-row")" Bordered PaginationPosition="None">
             <PropertyColumn Property="c=>c.ImagePath" Title="">
                 <Image Src="../src/fanera-fk.jpg" class="product-cart-image"></Image>
@@ -21,17 +22,14 @@
             <PropertyColumn Property="c=>c.Product.Naim2" Title="Товар" Width="200px">
                 <NavLink href=@context.Product.Link>@context.Product.Naim2</NavLink>
             </PropertyColumn>
-            <PropertyColumn Width="30%" Property="c=>c.Count" Title="Кол-во" Style="width:150px">
-                @if (editId == context.Id)
-                {
-                    <Input Type="number" @bind-Value="context.Count" OnBlur="stopEdit" AutoFocus Min="1" Style="width:100px" />
-                }
-                else
-                {
-                    <div class="editable-cell-value-wrap" style="padding-right:24px" @onclick="()=>StartEdit(context.Id)">
-                        @context.Count
-                    </div>
-                }
+            <PropertyColumn Property="c=>c.Price" Title="Цена" Width="90px">
+                <p>@context.Price</p>
+            </PropertyColumn>
+            <PropertyColumn Width="30%" Property="c=>c.Count" Title="Кол-во" Style="width:90px">
+                <Input Type="number" @bind-Value="context.Count" OnBlur="stopEdit" AutoFocus Min="1" Style="width:90px" />
+            </PropertyColumn>
+            <PropertyColumn Property="c=>c.Summa" Title="Сумма" Width="90px">
+                <p>@context.Summa</p>
             </PropertyColumn>
             <ActionColumn Title="">
                 <Popconfirm Title="Удалить?"
@@ -44,9 +42,75 @@
                 </Popconfirm>
             </ActionColumn>
         </Table>
+        <div class="cart-delivery">
+            <div class="row g-3 form-inline">
+                <div class="col-12 col-md-4">
+                    <BootstrapBlazor.Components.Checkbox TValue="bool" @bind-Value="@IsDelivery" ShowLabel="true" DisplayText="Доставка"></BootstrapBlazor.Components.Checkbox>
+                </div>
+            </div>
+            @if (IsDelivery)
+            {
+                <BootstrapBlazor.Components.BootstrapInput PlaceHolder="..."
+                                                       TValue="string"
+                                                       IsSelectAllTextOnFocus="true"
+                                                       ShowLabel="true"
+                                                       @bind-Value="@Address"
+                                                       DisplayText="Введите адрес" />
+                <BootstrapBlazor.Components.DateTimePicker TValue="DateTime" MinValue="@DateTime.Now" MaxValue="@DateTime.Now.AddDays(10)"
+                                                       @bind-Value="@DeliveryDate"
+                                                       DisplayText="Дата и время доставки" ShowLabel="true" ViewMode="BootstrapBlazor.Components.DatePickerViewMode.DateTime"
+                                                       Format="dd.MM.yyyy HH:mm:ss"></BootstrapBlazor.Components.DateTimePicker>
+                <div class="cart-itog-sum">
+                    <h5>Стоимость</h5>
+                    <h4>@DeliveryCost рублей</h4>
+                </div>
+            }
+        </div>
+        <div class="cart-delivery">
+            <div class="row g-3 form-inline">
+                <div class="col-12 col-md-4">
+                    <BootstrapBlazor.Components.Checkbox TValue="bool" @bind-Value="@IsRaspil" ShowLabel="true" DisplayText="Распил"></BootstrapBlazor.Components.Checkbox>
+                </div>
+            </div>
+            @if (IsRaspil)
+            {
+                <BootstrapBlazor.Components.BootstrapInput PlaceHolder="..."
+                                                       TValue="string"
+                                                       IsSelectAllTextOnFocus="true"
+                                                       ShowLabel="true"
+                                                       @bind-Value="@Address"
+                                                       DisplayText="Размеры распила" />
+                <div class="cart-itog-sum">
+                    <h5>Стоимость</h5>
+                    <h4>уточните у менеджера</h4>
+                </div>
+            }
+        </div>
     </div>
     <div class="d-flex flex-column cart-itog">
-        <h2>Итого</h2>
+        <div class="cart-itog-sum">
+            <h5>Товары</h5>
+            <h5>@SummaProducts</h5>
+        </div>
+        @if (IsDelivery)
+        {
+            <div class="cart-itog-sum">
+                <h5>Доставка</h5>
+                <h5>@DeliveryCost</h5>
+            </div>
+        }
+        @if (IsRaspil)
+        {
+            <div class="cart-itog-sum">
+                <h5>Распил</h5>
+                <h5>уточните</h5>
+            </div>
+        }
+        <div class="cart-itog-sum">
+            <h4>Итого</h4>
+            <h2>@SummaCart</h2>
+        </div>
+        <BootstrapBlazor.Components.Button class="btn-white" OnClick="@CheckOut">Перейти к оформлению</BootstrapBlazor.Components.Button>
     </div>
 </div>
 
@@ -76,6 +140,11 @@
     int? editId;
 
     List<ProductCart> ProductCarts { get; set; } = new List<ProductCart>();
+    private bool IsDelivery { get; set; }
+    private bool IsRaspil { get; set; }
+    private string Address { get; set; }
+    private DateTime DeliveryDate { get; set; }
+    private double DeliveryCost { get; set; } = 1300;
 
     //protected override async Task OnAfterRenderAsync(bool firstRender)
     protected override async Task OnInitializedAsync()
@@ -108,5 +177,26 @@
     private async Task SetCart()
     {
         await localStorage.SetItemAsync("UserCart", ProductCarts);
+    }
+
+    private double SummaProducts
+    {
+        get
+        {
+            return ProductCarts.Sum(p => p.Summa);
+        }
+    }
+
+    private double SummaCart
+    {
+        get
+        {
+            return SummaProducts + (IsDelivery ? DeliveryCost : 0);
+        }
+    }
+
+    private void CheckOut()
+    {
+        NavigationManager.NavigateTo("/checkout");
     }
 }
