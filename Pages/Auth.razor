@@ -13,9 +13,8 @@
         <div class="d-flex flex-row account">
             <div class="d-flex flex-column account-data">
                 <h2>Личные данные</h2>
-                <BootstrapInput @bind-Value="@CurrentUser.Name" PlaceHolder="Имя" IsTrim="true" ShowLabel="true" DisplayText="Имя" />
-                <BootstrapInput @bind-Value="@CurrentUser.Email" PlaceHolder="Email" IsTrim="true" ShowLabel="true" DisplayText="Email" />
-                <BootstrapInput @bind-Value="@CurrentUser.Phone" PlaceHolder="Телефон" IsTrim="true" ShowLabel="true" DisplayText="Телефон" />
+                <BootstrapInput @bind-Value="@CurrentUser.name" PlaceHolder="Имя" IsTrim="true" ShowLabel="true" DisplayText="Имя" />
+                <BootstrapInput @bind-Value="@CurrentUser.login" PlaceHolder="Email" IsTrim="true" ShowLabel="true" DisplayText="Email" />
                 <a class="ml-md-auto btn btn-primary"
                    href="/logout?returnUrl=/"
                    target="_top">Выйти</a>
@@ -58,7 +57,7 @@
             {
                 if (user.Identity is not null && user.Identity.IsAuthenticated)
                 {
-                    CurrentUser = new User() { Name = user.Identity.Name };
+                    CurrentUser = new User() { name = user.Identity.Name };
                 }
             }
         }

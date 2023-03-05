@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using OnlineShop.Models;
+using ShopLib;
 
 namespace OnlineShop.Pages
 {
@@ -43,7 +44,7 @@ namespace OnlineShop.Pages
                 new Claim(ClaimTypes.Name, paramUsername),
                 new Claim(ClaimTypes.Role, "Customer"),
             };
-            CurrentUser = new User() { Name = "Customer", Email = paramUsername, Phone = "+79172416373" };
+            CurrentUser = new User() { name = "Customer", login = paramUsername/*, Phone = "+79172416373" */};
             var claimsIdentity = new ClaimsIdentity(
                 claims, CookieAuthenticationDefaults.AuthenticationScheme);
             var authProperties = new AuthenticationProperties

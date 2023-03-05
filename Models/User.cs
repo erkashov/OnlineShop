@@ -2,7 +2,7 @@
 
 namespace OnlineShop.Models
 {
-    public class User
+    public class User2
     {
         /// <summary>
         /// Gets or sets the identifier.

@@ -118,12 +118,16 @@
     {
         if (ProductCount > 0)
         {
-            List<ProductCart> productCarts = await localStorage.GetItemAsync<List<ProductCart>>("UserCart");
-            if (productCarts == null) productCarts = new List<ProductCart>();
-            ProductCart? productCart = productCarts.Where(p => p.Product.ID == Id).FirstOrDefault();
-            if (productCart == null) productCarts.Add(new ProductCart() { Count = ProductCount, Id = Id, Product = ProductItem });
+            ShoppingCart? shoppingCart = await localStorage.GetItemAsync<ShoppingCart>("ShoppingCart");
+            if (shoppingCart == null)
+            {
+                shoppingCart = new ShoppingCart();
+            }
+            if (shoppingCart.ProductCarts == null) shoppingCart.ProductCarts = new List<ProductCart>();
+            ProductCart? productCart = shoppingCart.ProductCarts.Where(p => p.Product.ID == Id).FirstOrDefault();
+            if (productCart == null) shoppingCart.ProductCarts.Add(new ProductCart() { Count = ProductCount, Id = Id, Product = ProductItem });
             else productCart.Count += ProductCount;
-            await localStorage.SetItemAsync("UserCart", productCarts);
+            await localStorage.SetItemAsync("ShoppingCart", shoppingCart);
         }
     }
 

@@ -43,12 +43,16 @@
 
     private async Task AddToCart()
     {
-        List<ProductCart> productCarts = await localStorage.GetItemAsync<List<ProductCart>>("UserCart");
-        if (productCarts == null) productCarts = new List<ProductCart>();
-        ProductCart? productCart = productCarts.Where(p => p.Product.ID == Id).FirstOrDefault();
-        if (productCart == null) productCarts.Add(new ProductCart() { Count = 1, Id = Id, Product = Product });
+        ShoppingCart? shoppingCart = await localStorage.GetItemAsync<ShoppingCart>("ShoppingCart");
+        if (shoppingCart == null)
+        {
+            shoppingCart = new ShoppingCart();
+        }
+        if (shoppingCart.ProductCarts == null) shoppingCart.ProductCarts = new List<ProductCart>();
+        ProductCart? productCart = shoppingCart.ProductCarts.Where(p => p.Product.ID == Id).FirstOrDefault();
+        if (productCart == null) shoppingCart.ProductCarts.Add(new ProductCart() { Count = 1, Id = Id, Product = Product });
         else productCart.Count += 1;
-        await localStorage.SetItemAsync("UserCart", productCarts);
+        await localStorage.SetItemAsync("ShoppingCart", shoppingCart);
         await Task.Delay(1000);
     }
 }
