@@ -38,6 +38,11 @@
         }
     </div>
     <div class="d-flex flex-column">
+        @if (!String.IsNullOrWhiteSpace(Search))
+        {
+            <PageTitle>Поиск @Search</PageTitle>
+            <h3>Поиск @Search</h3>
+        }
         <ListView TItem="ShopLib.Product" Items="@Products">
             <BodyTemplate>
                 <BootstrapBlazor.Components.Card>
@@ -70,6 +75,10 @@
     [Parameter]
     [SupplyParameterFromQuery(Name = "ThicknessFilter")]
     public string ThicknessFilter { get; set; } = "";
+
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "Search")]
+    public string Search { get; set; } = "";
 
     private List<SelectedItem>? SortItems { get; set; } = new List<SelectedItem>();
     private List<SelectedItem>? TolItems { get; set; } = new List<SelectedItem>();
@@ -139,6 +148,7 @@
         filter.ProductsThickness = TolItems?.Where(p => p.Active == true).Select(p => Convert.ToDouble(p.Value)).ToList();
         filter.ProductsSorts = SortItems?.Where(p => p.Active == true).Select(p => p.Value).ToList();
         filter.CategoryId = SelectedCategory != null ? SelectedCategory.ID : 0;
+        filter.Search = Search != null ? Search : "";
         Products = new ObservableCollection<ShopLib.Product>(await BaseHttpService<ShopLib.Product>.SendListAsync<ShopLib.Product>("Tovary/Filter", HttpMethod.Post, filter));
     }
 }

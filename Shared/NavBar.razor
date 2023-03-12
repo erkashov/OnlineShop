@@ -8,7 +8,7 @@
         </NavLink>
     </div>
     <div>
-        <Search Placeholder="Поиск" WrapperStyle="width: 200px;" ClassicSearchIcon />
+        <BootstrapBlazor.Components.BootstrapInput @bind-Value="@Search" PlaceHolder="Поиск" IsTrim="true"  OnEnterAsync="OnEnterAsync"/>
     </div>
     <div class="d-flex flex-row child">
         <div>
@@ -25,5 +25,10 @@
 </div>
 
 @code {
+    public string Search { get; set; }
 
+    private async Task OnEnterAsync(string val)
+    {
+        NavigationManag.NavigateTo($"catalog?search=" + Search);
+    }
 }
