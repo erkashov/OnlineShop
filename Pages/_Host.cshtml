@@ -1,8 +1,10 @@
 ﻿@page "/"
 @namespace OnlineShop.Pages
+@using OnlineShop.Models
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @{
     Layout = "_Layout";
-}
 
-<component type="typeof(App)" render-mode="ServerPrerendered" />
+}
+@model HostModel
+<component type="typeof(App)" render-mode="ServerPrerendered" param-Token="@Model.Token" param-IPAddress="@Model.IPAddress"/>

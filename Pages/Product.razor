@@ -3,6 +3,7 @@
 @using BootstrapBlazor.Components
 @inject NavigationManager NavigationManager
 @inject Blazored.LocalStorage.ILocalStorageService localStorage
+@inject BootstrapBlazor.Components.SwalService SswalService
 
 <div class="d-flex flex-column">
     <h1 class="product-page-header">@ProductItem.Naim2</h1>
@@ -42,12 +43,23 @@
             </div>
         </div>
     </div>
-    <Descriptions Title="Характеристики">
-        <DescriptionsItem Title="Размеры">@ProductItem.dlina*@ProductItem.shir</DescriptionsItem>
-        <DescriptionsItem Title="Сорт">@ProductItem.nazn @ProductItem.sort</DescriptionsItem>
-        <DescriptionsItem Title="Толщина">@ProductItem.tol мм</DescriptionsItem>
-        <DescriptionsItem Title="Шлифовка">@ProductItem.dekor</DescriptionsItem>
-    </Descriptions>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th scope="row">Размеры</th>
+                <td>@ProductItem.dlina*@ProductItem.shir</td>
+            </tr>
+            <tr>
+                <th scope="row">Сорт</th>
+                <td>@ProductItem.nazn @ProductItem.sort</td>
+            </tr>
+            <tr>
+                <th scope="row">Толщина</th>
+                <td>@ProductItem.tol мм</td>
+            </tr>
+        </tbody>
+    </table>
 
 </div>
 
@@ -66,12 +78,12 @@
 
     private List<SelectedItem>? SortItems { get; set; } = new List<SelectedItem>();
     private List<SelectedItem>? TolItems { get; set; } = new List<SelectedItem>();
-
-
+    [Inject]
+    private BootstrapBlazor.Components.SwalService swalService { get; set; }
     protected override async Task OnParametersSetAsync()
     {
         IsAvailable = Id % 2 == 0;
-        ProductItem = (await BaseHttpService<ShopLib.Product>.SendAsync<ShopLib.Product>("Tovary/" + Id, HttpMethod.Get)).FirstOrDefault();
+        ProductItem = (await BaseHttpService<ShopLib.Product>.SendListAsync<ShopLib.Product>("Tovary/" + Id, HttpMethod.Get)).FirstOrDefault();
         await GetProducts();
     }
 
@@ -93,7 +105,7 @@
     {
         CategoryFilter filter = new CategoryFilter();
         filter.CategoryId = ProductItem.categoryID;
-        Products = await BaseHttpService<ShopLib.Product>.SendAsync<ShopLib.Product>("Tovary/Filter", HttpMethod.Post, filter);
+        Products = await BaseHttpService<ShopLib.Product>.SendListAsync<ShopLib.Product>("Tovary/Filter", HttpMethod.Post, filter);
         ThicknessList = Products.Select(p => p.tol).Distinct().ToList();
         SortsList = Products.Select(p => p.sort).Distinct().ToList();
         SortItems = new List<SelectedItem>();
@@ -118,16 +130,34 @@
     {
         if (ProductCount > 0)
         {
-            ShoppingCart? shoppingCart = await localStorage.GetItemAsync<ShoppingCart>("ShoppingCart");
-            if (shoppingCart == null)
+            int stock = await GlobalMethod.GetProductStock(Id);
+            if (stock >= ProductCount)
             {
-                shoppingCart = new ShoppingCart();
+                ShoppingCart? shoppingCart = await localStorage.GetItemAsync<ShoppingCart>("ShoppingCart");
+                if (shoppingCart == null)
+                {
+                    shoppingCart = new ShoppingCart();
+                }
+                if (shoppingCart.ProductCarts == null) shoppingCart.ProductCarts = new List<ProductCart>();
+                ProductCart? productCart = shoppingCart.ProductCarts.Where(p => p.Product.ID == Id).FirstOrDefault();
+                if (productCart == null) shoppingCart.ProductCarts.Add(new ProductCart() { Count = ProductCount, Id = Id, Product = ProductItem });
+                else productCart.Count += ProductCount;
+                await localStorage.SetItemAsync("ShoppingCart", shoppingCart);
             }
-            if (shoppingCart.ProductCarts == null) shoppingCart.ProductCarts = new List<ProductCart>();
-            ProductCart? productCart = shoppingCart.ProductCarts.Where(p => p.Product.ID == Id).FirstOrDefault();
-            if (productCart == null) shoppingCart.ProductCarts.Add(new ProductCart() { Count = ProductCount, Id = Id, Product = ProductItem });
-            else productCart.Count += ProductCount;
-            await localStorage.SetItemAsync("ShoppingCart", shoppingCart);
+            else
+            {
+                var op = new BootstrapBlazor.Components.SwalOption()
+                    {
+                        Category = BootstrapBlazor.Components.SwalCategory.Error,
+                        Title = "Такого кол-ва нет в наличии",
+                        Content = "Максимум - " + stock,
+                        ShowClose = true,
+                        CloseButtonText = "Закрыть"
+                    };
+
+                await swalService?.Show(op);
+                ProductCount = stock;
+            }
         }
     }
 

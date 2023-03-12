@@ -21,7 +21,7 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        Product = (await BaseHttpService<Product>.SendAsync<Product>("Tovary/" + Id, HttpMethod.Get)).FirstOrDefault();
+        Product = (await BaseHttpService<Product>.SendListAsync<Product>("Tovary/" + Id, HttpMethod.Get)).FirstOrDefault();
     }
 
     private string GetPrice()

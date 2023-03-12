@@ -17,58 +17,34 @@
 <Spin Spinning=loading Delay=500>
     <div class="d-flex flex-row">
         <div class="d-flex flex-column gap-20">
-            <Table DataSource="ShoppingCart.ProductCarts" RowClassName="@(_=>"editable-row")" Bordered PaginationPosition="None">
-                <PropertyColumn Property="c=>c.ImagePath" Title="">
-                    <Image Src="../src/fanera-fk.jpg" class="product-cart-image"></Image>
-                </PropertyColumn>
-                <PropertyColumn Property="c=>c.Product.Naim2" Title="Товар" Width="200px">
-                    <NavLink href=@context.Product.Link>@context.Product.Naim2</NavLink>
-                </PropertyColumn>
-                <PropertyColumn Property="c=>c.Price" Title="Цена" Width="90px">
-                    <p>@context.Price</p>
-                </PropertyColumn>
-                <PropertyColumn Width="30%" Property="c=>c.Count" Title="Кол-во" Style="width:90px">
-                    <Input Type="number" @bind-Value="context.Count" OnBlur="stopEdit" AutoFocus Min="1" Style="width:90px" />
-                </PropertyColumn>
-                <PropertyColumn Property="c=>c.Summa" Title="Сумма" Width="90px">
-                    <p>@context.Summa</p>
-                </PropertyColumn>
-                <ActionColumn Title="">
-                    <Popconfirm Title="Удалить?"
-                                OnConfirm="()=> DeleteRow(context.Id)"
-                                OkText="Yes"
-                                CancelText="No">
-                        <a href="/cart">
-                            <Icon Type="close" Theme="outline" class="icons" />
-                        </a>
-                    </Popconfirm>
-                </ActionColumn>
-            </Table>
             <div class="cart-delivery">
-                <div class="row g-3 form-inline">
-                    <div class="col-12 col-md-4">
-                        <BootstrapBlazor.Components.Checkbox TValue="bool" @bind-Value="@ShoppingCart.HasDelivery" ShowLabel="true"
-                                                             DisplayText="Доставка" OnStateChanged="@OnItemChangedString"></BootstrapBlazor.Components.Checkbox>
-                    </div>
-                </div>
-                @if (ShoppingCart.HasDelivery)
-                {
-                    <BootstrapBlazor.Components.BootstrapInput PlaceHolder="..." IsTrim="true" OnValueChanged="@OnValueChanged"
-                                                           TValue="string"
-                                                           IsSelectAllTextOnFocus="true"
-                                                           ShowLabel="true"
-                                                           @bind-Value="@ShoppingCart.Delivery.DeliveryAddress"
-                                                           DisplayText="Введите адрес" />
-                    <BootstrapBlazor.Components.DateTimePicker TValue="DateTime" MinValue="@DateTime.Now" MaxValue="@DateTime.Now.AddDays(10)"
-                                                           OnValueChanged="@OnDateValueChanged"
-                                                           @bind-Value="@ShoppingCart.Delivery.DeliveryDate"
-                                                           DisplayText="Дата и время доставки" ShowLabel="true" ViewMode="BootstrapBlazor.Components.DatePickerViewMode.DateTime"
-                                                           Format="dd.MM.yyyy HH:mm:ss"></BootstrapBlazor.Components.DateTimePicker>
-                    <div class="cart-itog-sum">
-                        <h5>Стоимость</h5>
-                        <h4>@ShoppingCart.Delivery.DeliveryCost рублей</h4>
-                    </div>
-                }
+                <Table DataSource="ShoppingCart.ProductCarts" RowClassName="@(_=>"editable-row")" Bordered PaginationPosition="None">
+                    <PropertyColumn Property="c=>c.ImagePath" Title="">
+                        <Image Src="../src/fanera-fk.jpg" class="product-cart-image"></Image>
+                    </PropertyColumn>
+                    <PropertyColumn Property="c=>c.Product.Naim2" Title="Товар" Width="200px">
+                        <NavLink href=@context.Product.Link>@context.Product.Naim2</NavLink>
+                    </PropertyColumn>
+                    <PropertyColumn Property="c=>c.Price" Title="Цена" Width="90px">
+                        <p>@context.Price</p>
+                    </PropertyColumn>
+                    <PropertyColumn Width="30%" Property="c=>c.Count" Title="Кол-во" Style="width:90px">
+                        <Input Type="number" @bind-Value="@context.Count" OnBlur="stopEdit" AutoFocus TValue="int" Min="1" Style="width:90px" />
+                    </PropertyColumn>
+                    <PropertyColumn Property="c=>c.Summa" Title="Сумма" Width="90px">
+                        <p>@context.Summa</p>
+                    </PropertyColumn>
+                    <ActionColumn Title="">
+                        <Popconfirm Title="Удалить?"
+                                    OnConfirm="()=> DeleteRow(context.Id)"
+                                    OkText="Yes"
+                                    CancelText="No">
+                            <a href="/cart">
+                                <Icon Type="close" Theme="outline" class="icons" />
+                            </a>
+                        </Popconfirm>
+                    </ActionColumn>
+                </Table>
             </div>
             <div class="cart-delivery">
                 <div class="row g-3 form-inline">
@@ -93,33 +69,114 @@
             </div>
         </div>
         <div class="d-flex flex-column cart-itog">
-            <div class="cart-itog-sum">
-                <h5>Товары</h5>
-                <h5>@ShoppingCart.SummaProducts</h5>
-            </div>
-            @if (@ShoppingCart.HasDelivery)
-            {
-                <div class="cart-itog-sum">
-                    <h5>Доставка</h5>
-                    <h5>@ShoppingCart.Delivery.DeliveryCost</h5>
+            <div class="d-flex flex-column cart-delivery">
+                <div class="cart-delivery">
+                    <h4>Способ оплаты</h4>
+                    <BootstrapBlazor.Components.RadioList TValue="int" OnSelectedChanged=@OnSelectedChanged @bind-Value="@ShoppingCart.PaymentType"
+                                                          Items="@PayersTypes" IsVertical="true"></BootstrapBlazor.Components.RadioList>
+
                 </div>
-            }
-            @if (@ShoppingCart.HasRaspil)
-            {
-                <div class="cart-itog-sum">
-                    <h5>Распил</h5>
-                    <h5>уточните</h5>
+                <div class="cart-delivery">
+                    <h4>Доставка</h4>
+                    <BootstrapBlazor.Components.RadioList TValue="int" @bind-Value="@ShoppingCart.DeliveryType" OnSelectedChanged=@OnSelectedChanged
+                                                          Items="@DelivTypes" IsVertical="true"></BootstrapBlazor.Components.RadioList>
+                    @if (ShoppingCart.HasDelivery)
+                    {
+                        <BootstrapBlazor.Components.BootstrapInput PlaceHolder="..." IsTrim="true" OnValueChanged="@OnValueChanged"
+                                                               TValue="string"
+                                                               IsSelectAllTextOnFocus="true"
+                                                               ShowLabel="true"
+                                                               @bind-Value="@ShoppingCart.Delivery.DeliveryAddress"
+                                                               DisplayText="Введите адрес" />
+                        <BootstrapBlazor.Components.DateTimePicker TValue="DateTime" MinValue="@DateTime.Now" MaxValue="@DateTime.Now.AddDays(10)"
+                                                               OnValueChanged="@OnDateValueChanged"
+                                                               @bind-Value="@ShoppingCart.Delivery.DeliveryDate"
+                                                               DisplayText="Дата и время доставки" ShowLabel="true" ViewMode="BootstrapBlazor.Components.DatePickerViewMode.DateTime"
+                                                               Format="dd.MM.yyyy HH:mm:ss"></BootstrapBlazor.Components.DateTimePicker>
+                        <div class="cart-itog-sum">
+                            <h5>Стоимость</h5>
+                            <h4>@ShoppingCart.Delivery.DeliveryCost рублей</h4>
+                        </div>
+                    }
                 </div>
-            }
-            <div class="cart-itog-sum">
-                <h4>Итого</h4>
-                <h2>@ShoppingCart.SummaCart</h2>
+                <div class="d-flex flex-column">
+                    <div class="cart-itog-sum">
+                        <h5>Товары</h5>
+                        <h5>@ShoppingCart.SummaProducts</h5>
+                    </div>
+                    @if (@ShoppingCart.HasDelivery)
+                    {
+                        <div class="cart-itog-sum">
+                            <h5>Доставка</h5>
+                            <h5>@ShoppingCart.Delivery.DeliveryCost</h5>
+                        </div>
+                    }
+                    @if (@ShoppingCart.HasRaspil)
+                    {
+                        <div class="cart-itog-sum">
+                            <h5>Распил</h5>
+                            <h5>уточните</h5>
+                        </div>
+                    }
+                    <div class="cart-itog-sum">
+                        <h4>Итого</h4>
+                        <h2>@ShoppingCart.SummaCart</h2>
+                    </div>
+                </div>
             </div>
-            <BootstrapBlazor.Components.Button class="btn-white" OnClick="@(e => OnSwal())">Оформить</BootstrapBlazor.Components.Button>
+                    <BootstrapBlazor.Components.Button OnClick="@(e => OnSwal())"><h3 style="color: #fff;">Оформить</h3></BootstrapBlazor.Components.Button>
         </div>
+
     </div>
 </Spin>
-
+<BootstrapBlazor.Components.Modal @ref="SmailModal">
+    <BootstrapBlazor.Components.ModalDialog IsCentered="true" Size="BootstrapBlazor.Components.Size.Medium" Title="Кол-во товаров изменилось">
+        <BodyTemplate>
+            @if (changedCount.Where(p => p.Key.Count > 0).Count() != 0)
+            {
+                <div>У данных товаров изменилось кол-во в наличии</div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Товар</th>
+                            <th>Было</th>
+                            <th>В наличии</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var par in changedCount.Where(p => p.Key.Count > 0))
+                        {
+                            <tr>
+                                <th scope="row">@par.Key.Product.Naim2</th>
+                                <td>@par.Value</td>
+                                <td>@par.Key.Count</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            @if (changedCount.Where(p => p.Key.Count == 0).Count() != 0)
+            {
+                <div>Данные товары разобрали</div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Товар</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var par in changedCount.Where(p => p.Key.Count == 0))
+                        {
+                            <tr>
+                                <th scope="row">@par.Key.Product.Naim2</th>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </BodyTemplate>
+    </BootstrapBlazor.Components.ModalDialog>
+</BootstrapBlazor.Components.Modal>
 <style>
     .editable-cell {
         position: relative;
@@ -145,9 +202,22 @@
     int i = 0;
     int? editId;
     public ShoppingCart? ShoppingCart { get; set; } = new ShoppingCart();
+    private Dictionary<ProductCart, int> changedCount = new Dictionary<ProductCart, int>();
+    private List<BootstrapBlazor.Components.SelectedItem> PayersTypes =
+        new List<BootstrapBlazor.Components.SelectedItem> {
+            new BootstrapBlazor.Components.SelectedItem{ Value =  "1", Text =  "Наличными" },
+            new BootstrapBlazor.Components.SelectedItem{ Value =  "2", Text =  "Картой онлайн" }};
+    private List<BootstrapBlazor.Components.SelectedItem> DelivTypes =
+        new List<BootstrapBlazor.Components.SelectedItem> {
+            new BootstrapBlazor.Components.SelectedItem{ Value =  "1", Text =  "Самовывоз со склада" },
+            new BootstrapBlazor.Components.SelectedItem{ Value =  "2", Text =  "Доставка" }};
+
+
     bool loading = true;
     [Inject]
     private BootstrapBlazor.Components.SwalService swalService { get; set; }
+
+    private BootstrapBlazor.Components.Modal? SmailModal { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -163,7 +233,7 @@
             if (ShoppingCart == null) ShoppingCart = new ShoppingCart();
             await SetCart();
             StateHasChanged();
-            loading = false;
+            await CheckStock();
         }
     }
 
@@ -197,8 +267,9 @@
 
     private void CheckOut()
     {
+        CheckStock();
         //что то
-        NavigationManager.NavigateTo("/checkout");
+        //NavigationManager.NavigateTo("/checkout");
     }
 
     private async Task OnItemChangedString(BootstrapBlazor.Components.CheckboxState state, bool value)
@@ -218,15 +289,60 @@
 
     private async Task OnSwal()
     {
-        var op = new BootstrapBlazor.Components.SwalOption()
-            {
-                Category = BootstrapBlazor.Components.SwalCategory.Success,
-                Title = "Заказ оформлен",
-                Content = "Дождитесь подтвержения менеджера",
-                ShowClose = true,
-                CloseButtonText="Закрыть"
-            };
+        await CheckStock();
+        if (changedCount.Count == 0)
+        {
+            var op = new BootstrapBlazor.Components.SwalOption()
+                {
+                    Category = BootstrapBlazor.Components.SwalCategory.Success,
+                    Title = "Заказ оформлен",
+                    Content = "Дождитесь подтвержения менеджера",
+                    ShowClose = true,
+                    CloseButtonText = "Закрыть"
+                };
 
-        await swalService?.Show(op);
+            await swalService?.Show(op);
+        }
+    }
+
+    private async Task CheckStock()
+    {
+        changedCount.Clear();
+        loading = true;
+        StateHasChanged();
+        foreach (var prodCart in ShoppingCart.ProductCarts)
+        {
+            int stock = await GlobalMethod.GetProductStock(prodCart.Product.ID);
+            if (stock > 0)
+            {
+                if (stock < prodCart.Count)
+                {
+                    changedCount.Add(prodCart, prodCart.Count);
+                    prodCart.Count = stock;
+                }
+            }
+            else
+            {
+                changedCount.Add(prodCart, prodCart.Count);
+                prodCart.Count = stock;
+            }
+        }
+        if (changedCount.Count > 0)
+        {
+            await SetCart();
+            await SmailModal.Toggle();
+        }
+        foreach (var deletedProd in changedCount.Where(p => p.Key.Count == 0))
+        {
+            ShoppingCart.ProductCarts.Remove(ShoppingCart.ProductCarts.Where(p => p.Product.ID == deletedProd.Key.Product.ID).FirstOrDefault());
+        }
+        loading = false;
+        StateHasChanged();
+    }
+
+    private async Task<Task> OnSelectedChanged(IEnumerable<BootstrapBlazor.Components.SelectedItem> items, int value)
+    {
+        await SetCart();
+        return Task.CompletedTask;
     }
 }

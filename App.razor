@@ -1,17 +1,32 @@
-﻿<CascadingAuthenticationState>
-    <BootstrapBlazor.Components.BootstrapBlazorRoot>
-        <Router AppAssembly="@typeof(App).Assembly">
-            <Found Context="routeData">
-                <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
-                <FocusOnNavigate RouteData="@routeData" Selector="h1" />
-            </Found>
-            <NotFound>
-                <PageTitle>Not found</PageTitle>
-                <LayoutView Layout="@typeof(MainLayout)">
-                    <p role="alert">Sorry, there's nothing at this address.</p>
-                </LayoutView>
-            </NotFound>
-        </Router>
-    </BootstrapBlazor.Components.BootstrapBlazorRoot>
+﻿@code {
+    //[Parameter]
+    //public string Token { get; set; }
+    //protected override async Task OnInitializedAsync()
+    //{
+    //    await UserSessionService.SetUserData(UserSessionData);
+    //}
+    [Parameter]
+    public string Token { get; set; }
+
+    [Parameter]
+    public string IPAddress { get; set; }
+}
+<CascadingAuthenticationState>
+    <CascadingValue Name="Token" Value="@Token">
+        <BootstrapBlazor.Components.BootstrapBlazorRoot>
+            <Router AppAssembly="@typeof(App).Assembly">
+                <Found Context="routeData">
+                    <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+                    <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+                </Found>
+                <NotFound>
+                    <PageTitle>Not found</PageTitle>
+                    <LayoutView Layout="@typeof(MainLayout)">
+                        <p role="alert">Sorry, there's nothing at this address.</p>
+                    </LayoutView>
+                </NotFound>
+            </Router>
+        </BootstrapBlazor.Components.BootstrapBlazorRoot>
+    </CascadingValue>
 </CascadingAuthenticationState>
-<AntContainer /> 
+<AntContainer />

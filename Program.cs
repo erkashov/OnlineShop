@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using System.Net.Http;
 using Blazored.LocalStorage;
+using OnlineShop.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,6 +31,7 @@ builder.Services.AddScoped<HttpClient>();
 builder.Services.AddBlazoredLocalStorage();   // local storage
 builder.Services.AddBlazoredLocalStorage(config => config.JsonSerializerOptions.WriteIndented = true);  // local storage
 builder.Services.AddSignalR();
+builder.Services.AddScoped<IUserSessionService, UserSessionService>();
 var app = builder.Build();
 app.UseWebSockets();
 // Configure the HTTP request pipeline.
@@ -44,6 +46,7 @@ app.UseAuthentication();
 app.UseStaticFiles();
 
 app.UseRouting();
+app.MapRazorPages();
 app.MapControllers();
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");

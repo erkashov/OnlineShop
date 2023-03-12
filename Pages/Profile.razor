@@ -1,0 +1,75 @@
+﻿@page "/profile"
+@using System.Web;
+@using Microsoft.AspNetCore.Http
+@using OnlineShop.Models
+@inject IHttpContextAccessor httpContextAccessor
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+@inject NavigationManager NavigationManager
+@using BootstrapBlazor.Components
+@inject IJSRuntime JS;
+
+<PageTitle>Профиль</PageTitle>
+<AuthorizeView>
+    <Authorized>
+        <PageTitle>Профиль</PageTitle>
+        <div class="d-flex flex-row account">
+            <div class="d-flex flex-column account-data">
+                <h2>Личные данные</h2>
+                <BootstrapInput @bind-Value="@CurrentUser.surname" PlaceHolder="Фамилия" IsTrim="true" ShowLabel="true" DisplayText="Фамилия" />
+                <BootstrapInput @bind-Value="@CurrentUser.name" PlaceHolder="Имя" IsTrim="true" ShowLabel="true" DisplayText="Имя" />
+                <BootstrapInput @bind-Value="@CurrentUser.papaname" PlaceHolder="Отчество" IsTrim="true" ShowLabel="true" DisplayText="Отчество" />
+                <BootstrapInput @bind-Value="@CurrentUser.login" Formatter="@PhoneFormatter" PlaceHolder="Телефон" IsTrim="true" ShowLabel="true" DisplayText="Телефон" type='phone' />
+
+                <BootstrapBlazor.Components.Button OnClick=@SaveChanges>Сохранить</BootstrapBlazor.Components.Button>
+                <BootstrapBlazor.Components.Button OnClick=@Logout Color="BootstrapBlazor.Components.Color.Danger">Выйти</BootstrapBlazor.Components.Button>
+            </div>
+            <div class="d-flex flex-column">
+                <h2>Мои покупки</h2>
+
+            </div>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <Redirect Url="/auth"></Redirect>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationState { get; set; }
+    private static string PhoneFormatter(string source) => String.Format("{0:(###) ###-####}", source);
+    public User CurrentUser { get; set; } = new User();
+    protected override async Task OnInitializedAsync()
+    {
+        if (authenticationState is not null)
+        {
+            var authState = await authenticationState;
+            var user = authState?.User;
+
+            if (user is not null)
+            {
+                if (user.Identity is not null && user.Identity.IsAuthenticated)
+                {
+                    var tokenClaim = user.FindFirst("Token");
+                    if (tokenClaim != null)
+                    {
+                        User? temp_user = await ShopLib.Auth.GetUserByToken(tokenClaim.Value);
+                        if (temp_user == null) NavigationManager.NavigateTo("/logout?returnUrl=/");
+                        else CurrentUser = temp_user;
+                    }
+                    else NavigationManager.NavigateTo("/logout?returnUrl=/", true);
+                }
+            }
+        }
+    }
+
+    private async Task SaveChanges()
+    {
+        
+    }
+
+    private async Task Logout()
+    {
+        NavigationManag.NavigateTo($"/logout?returnUrl=/", true);
+    }
+}

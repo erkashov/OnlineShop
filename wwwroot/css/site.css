@@ -213,7 +213,7 @@ a {
     margin-bottom: auto;
     border-radius: 12px;
     min-width: 300px;
-    background-color: #07DA5F;
+
 }
 
 .cart-delivery {
@@ -223,7 +223,7 @@ a {
     gap: 10px;
     border-radius: 12px;
     min-width: 300px;
-    background-color: #e2f3f5;
+    background-color: #8ee4af;
 }
 
 .cart-itog-sum {
@@ -236,7 +236,6 @@ a {
     display: flex;
     flex-direction: row;
     padding: 0px;
-    gap: 20px;
     width: 250px;
     margin: 0 auto;
 }
@@ -336,13 +335,13 @@ a {
 }
 .btn {
     border-radius: 12px;
-    background: #07DA5F;
+    background: #00AF64;
     border: 0;
 }
 
 .btn-white {
     border-radius: 12px;
-    background: #3d5af1;
+    background: #0d6efd;
     border: 0;
 }
 

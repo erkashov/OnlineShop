@@ -88,14 +88,14 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        Categories = await BaseHttpService<Category>.SendAsync<Category>("Categories", HttpMethod.Get);
+        Categories = await BaseHttpService<Category>.SendListAsync<Category>("Categories", HttpMethod.Get);
         if (CategoryName != null)
         {
             SelectedCategory = Categories.Where(p => p.path == CategoryName).FirstOrDefault();
             if (SelectedCategory == null) NavigationManager.NavigateTo("/catalog");
             else
             {
-                CategoryFilter = (await BaseHttpService<CategoryFilter>.SendAsync<CategoryFilter>
+                CategoryFilter = (await BaseHttpService<CategoryFilter>.SendListAsync<CategoryFilter>
                     ("Categories/CategoryFilter?id=" + SelectedCategory.ID, HttpMethod.Get)).FirstOrDefault();
                 SortItems = new List<SelectedItem>();
                 TolItems = new List<SelectedItem>();
@@ -139,6 +139,6 @@
         filter.ProductsThickness = TolItems?.Where(p => p.Active == true).Select(p => Convert.ToDouble(p.Value)).ToList();
         filter.ProductsSorts = SortItems?.Where(p => p.Active == true).Select(p => p.Value).ToList();
         filter.CategoryId = SelectedCategory != null ? SelectedCategory.ID : 0;
-        Products = new ObservableCollection<ShopLib.Product>(await BaseHttpService<ShopLib.Product>.SendAsync<ShopLib.Product>("Tovary/Filter", HttpMethod.Post, filter));
+        Products = new ObservableCollection<ShopLib.Product>(await BaseHttpService<ShopLib.Product>.SendListAsync<ShopLib.Product>("Tovary/Filter", HttpMethod.Post, filter));
     }
 }

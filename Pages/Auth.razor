@@ -9,37 +9,26 @@
 <PageTitle>Авторизация</PageTitle>
 <AuthorizeView>
     <Authorized>
-        <PageTitle>Профиль</PageTitle>
-        <div class="d-flex flex-row account">
-            <div class="d-flex flex-column account-data">
-                <h2>Личные данные</h2>
-                <BootstrapInput @bind-Value="@CurrentUser.name" PlaceHolder="Имя" IsTrim="true" ShowLabel="true" DisplayText="Имя" />
-                <BootstrapInput @bind-Value="@CurrentUser.login" PlaceHolder="Email" IsTrim="true" ShowLabel="true" DisplayText="Email" />
-                <a class="ml-md-auto btn btn-primary"
-                   href="/logout?returnUrl=/"
-                   target="_top">Выйти</a>
-            </div>
-            <div class="d-flex flex-column">
-                <h2>Мои покупки</h2>
-
-            </div>
-        </div>
-
+        <Redirect Url="/profile"></Redirect>
     </Authorized>
     <NotAuthorized>
-        <div class="d-flex flex-column center-div">
-
+        <div class="d-flex flex-column center-div gap-20">
             <h1>Авторизация</h1>
-            <Input Placeholder="Почта" Type="email" @bind-Value="@Email" />
-            <Input Placeholder="Пароль" Type="text" @bind-Value="@Password" />
-            <a href="/login?paramUsername=@encode(@Email)&paramPassword=@encode(@Password)">Войти</a>
-            <NavLink href="/sign-up">Регистрация</NavLink>
+            <BootstrapInput Placeholder="Почта" @bind-Value="@Email" type='phone'/>
+            <BootstrapInput Placeholder="Пароль" @bind-Value="@Password" type='password'/>
+            <BootstrapBlazor.Components.Button OnClick=@AuthClick IsAsync="true">Войти</BootstrapBlazor.Components.Button>
+            <BootstrapBlazor.Components.Button OnClick=@RegClick>Регистрация</BootstrapBlazor.Components.Button>
         </div>
     </NotAuthorized>
 </AuthorizeView>
 @code {
     [CascadingParameter]
     private Task<AuthenticationState>? authenticationState { get; set; }
+    [Inject]
+    private BootstrapBlazor.Components.SwalService swalService { get; set; }
+    public string Email { get; set; }
+    public string Password { get; set; }
+    public User CurrentUser { get; set; }
 
     public Auth()
     {
@@ -61,21 +50,43 @@
                 }
             }
         }
-        if(await localStorage.ContainKeyAsync("CurrentUser"))
-        {
-            CurrentUser = await localStorage.GetItemAsync<User>("CurrentUser");
-        }
+        //if(await localStorage.ContainKeyAsync("CurrentUser"))
+        //{
+        //    CurrentUser = await localStorage.GetItemAsync<User>("CurrentUser");
+        //}
     }
-    public string Email { get; set; }
-    public string Password { get; set; }
-    public User CurrentUser { get; set; }
     private string encode(string param)
     {
         return HttpUtility.UrlEncode(param);
     }
-    private async Task AuthBtnClick()
+    private async Task AuthClick()
     {
-        await localStorage.SetItemAsync("UserEmail", Email);
-        //HttpContext.Response.Cookies.Append("UserEmail", Email);
+        if (!String.IsNullOrEmpty(Email) && !String.IsNullOrEmpty(Password))
+        {
+            var authResponce = await ShopLib.Auth.Login(Email, Password);
+            if (authResponce.User != null)
+            {
+
+                NavigationManag.NavigateTo($"/login?paramUsername={encode(Email)}&paramPassword={encode(Password)}", true);
+
+            }
+            else
+            {
+                var op = new BootstrapBlazor.Components.SwalOption()
+                    {
+                        Category = BootstrapBlazor.Components.SwalCategory.Error,
+                        Title = "Ошибка авторизации",
+                        Content = authResponce.Error,
+                        ShowClose = true,
+                        CloseButtonText = "Закрыть"
+                    };
+
+                await swalService?.Show(op);
+            }
+        }
+    }
+    private async Task RegClick()
+    {
+        NavigationManag.NavigateTo($"/sign-up", true);
     }
 }

@@ -1,13 +1,74 @@
 ﻿@page "/sign-up"
+@using System.Web;
+@using Microsoft.AspNetCore.Http
+@using OnlineShop.Models
+@inject IHttpContextAccessor httpContextAccessor
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+@inject NavigationManager NavigationManager
+@using BootstrapBlazor.Components
+@inject IJSRuntime JS;
+@inject BootstrapBlazor.Components.SwalService SswalService
 
 <PageTitle>Регистрация</PageTitle>
-<div class="d-flex flex-column center-div">
+<div class="d-flex flex-column center-div gap-20">
     <h1>Регистрация</h1>
-
-    <Button>Войти</Button>
-
+    <ValidateForm Model="@CurrentUser">
+        <div class="d-flex flex-column center-div gap-20">
+            <div> <BootstrapInput @bind-Value="@CurrentUser.surname" PlaceHolder="Фамилия" IsTrim="true" DisplayText="Фамилия" /></div>
+             <div><BootstrapInput @bind-Value="@CurrentUser.name" PlaceHolder="Имя" IsTrim="true" ShowLabel="true" DisplayText="Имя" /></div>
+             <div><BootstrapInput @bind-Value="@CurrentUser.papaname" PlaceHolder="Отчество" IsTrim="true" ShowLabel="true" DisplayText="Отчество" /></div>
+             <div><BootstrapInput @bind-Value="@CurrentUser.login" PlaceHolder="Телефон" IsTrim="true" ShowLabel="true" DisplayText="Телефон" type='phone' /></div>
+             <div><BootstrapInput @bind-Value="@CurrentUser.password" PlaceHolder="Пароль" IsTrim="true" ShowLabel="true" DisplayText="Пароль" type="password" /></div>
+            <BootstrapBlazor.Components.Button ButtonType="BootstrapBlazor.Components.ButtonType.Submit" IsAsync="true" OnClick=@Regist>Войти</BootstrapBlazor.Components.Button>
+        </div>
+    </ValidateForm>
 </div>
 
 @code {
+    public User CurrentUser { get; set; } = new User();
 
+    [Inject]
+    private BootstrapBlazor.Components.SwalService swalService { get; set; }
+
+    public async Task Regist()
+    {
+        if (CurrentUser.Validate())
+        {
+            CurrentUser.role = "Customer";
+            var res = await HttpService<User>.SendListAsync<User>("Users", HttpMethod.Post, CurrentUser);
+            if (res.HasErrors)
+            {
+                var op = new BootstrapBlazor.Components.SwalOption()
+                    {
+                        Category = BootstrapBlazor.Components.SwalCategory.Error,
+                        Title = "Ошибка запроса",
+                        Content = res.Error,
+                        ShowClose = true,
+                        CloseButtonText = "Закрыть"
+                    };
+
+                await swalService?.Show(op);
+            }
+            else
+            {
+                NavigationManager.NavigateTo($"/login?paramUsername={encode(CurrentUser.login)}&paramPassword={encode(CurrentUser.password)}", true);
+            }
+        }
+        else
+        {
+            var op = new BootstrapBlazor.Components.SwalOption()
+                {
+                    Category = BootstrapBlazor.Components.SwalCategory.Error,
+                    Title = "Заполните все поля",
+                    ShowClose = true,
+                    CloseButtonText = "Закрыть"
+                };
+
+            await swalService?.Show(op);
+        }
+    }
+    private string encode(string param)
+    {
+        return HttpUtility.UrlEncode(param);
+    }
 }
