@@ -19,7 +19,7 @@
         <div class="d-flex flex-column gap-20">
             <div class="cart-delivery">
                 <Table DataSource="ShoppingCart.ProductCarts" RowClassName="@(_=>"editable-row")" Bordered PaginationPosition="None">
-                    <PropertyColumn Property="c=>c.ImagePath" Title="">
+                    <PropertyColumn Property="c=>c.Product.zvet" Title="">
                         <Image Src="../src/fanera-fk.jpg" class="product-cart-image"></Image>
                     </PropertyColumn>
                     <PropertyColumn Property="c=>c.Product.Naim2" Title="Товар" Width="200px">
@@ -36,7 +36,7 @@
                     </PropertyColumn>
                     <ActionColumn Title="">
                         <Popconfirm Title="Удалить?"
-                                    OnConfirm="()=> DeleteRow(context.Id)"
+                                    OnConfirm="()=> DeleteRow(context.ProductId)"
                                     OkText="Yes"
                                     CancelText="No">
                             <a href="/cart">
@@ -49,8 +49,8 @@
             <div class="cart-delivery">
                 <div class="row g-3 form-inline">
                     <div class="col-12 col-md-4">
-                        <BootstrapBlazor.Components.Checkbox TValue="bool" @bind-Value="@ShoppingCart.HasRaspil" ShowLabel="true"
-                                                             DisplayText="Распил" OnStateChanged="@OnItemChangedString"></BootstrapBlazor.Components.Checkbox>
+                        <BootstrapBlazor.Components.Switch OnColor="BootstrapBlazor.Components.Color.Success" OffColor="BootstrapBlazor.Components.Color.Secondary"
+                                                           OnText="Распил" OffText="Распил" @bind-Value="@ShoppingCart.HasRaspil" OnValueChanged=@OnValueChanged></BootstrapBlazor.Components.Switch>
                     </div>
                 </div>
                 @if (ShoppingCart.HasRaspil)
@@ -124,7 +124,7 @@
                     </div>
                 </div>
             </div>
-                    <BootstrapBlazor.Components.Button OnClick="@(e => OnSwal())"><h3 style="color: #fff;">Оформить</h3></BootstrapBlazor.Components.Button>
+            <BootstrapBlazor.Components.Button OnClick="@(e => OnSwal())"><h3 style="color: #fff;">Оформить</h3></BootstrapBlazor.Components.Button>
         </div>
 
     </div>
@@ -199,6 +199,11 @@
 </style>
 
 @code {
+    [CascadingParameter(Name = "Token")]
+    public string Token { get; set; }
+    [CascadingParameter(Name = "IsAuthorized")]
+    public bool IsAuthorized { get; set; }
+
     int i = 0;
     int? editId;
     public ShoppingCart? ShoppingCart { get; set; } = new ShoppingCart();
@@ -225,11 +230,18 @@
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
-    //protected async Task OnAfterRenderAsync ()
     {
         if (firstRender)
         {
-            ShoppingCart = await localStorage.GetItemAsync<ShoppingCart>("ShoppingCart");
+            //if (IsAuthorized)
+            //{
+            //    ShoppingCart = await ShopingCartService.GetCart();
+            //}
+            //else
+            //{
+                ShoppingCart = await localStorage.GetItemAsync<ShoppingCart>("ShoppingCart");
+            //}
+
             if (ShoppingCart == null) ShoppingCart = new ShoppingCart();
             await SetCart();
             StateHasChanged();
@@ -239,7 +251,7 @@
 
     private async Task DeleteRow(int id)
     {
-        ShoppingCart.ProductCarts = ShoppingCart.ProductCarts.Where(d => d.Id != id).ToList();
+        ShoppingCart.ProductCarts = ShoppingCart.ProductCarts.Where(d => d.ProductId != id).ToList();
         await SetCart();
     }
 
@@ -250,7 +262,7 @@
 
     void stopEdit()
     {
-        var editedData = ShoppingCart.ProductCarts.FirstOrDefault(x => x.Id == editId);
+        var editedData = ShoppingCart.ProductCarts.FirstOrDefault(x => x.ProductId == editId);
         editId = null;
         SetCart();
     }
@@ -261,6 +273,11 @@
 
     private async Task SetCart()
     {
+        //if (IsAuthorized)
+        //{
+        //    await ShopingCartService.SetCart(ShoppingCart);
+        //}
+        //else 
         await localStorage.SetItemAsync("ShoppingCart", ShoppingCart);
     }
 
@@ -278,6 +295,11 @@
     }
 
     private async Task OnValueChanged(object value)
+    {
+        await SetCart();
+    }
+
+    private async Task OnValueChanged(bool value)
     {
         await SetCart();
     }

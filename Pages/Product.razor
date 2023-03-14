@@ -140,7 +140,7 @@
                 }
                 if (shoppingCart.ProductCarts == null) shoppingCart.ProductCarts = new List<ProductCart>();
                 ProductCart? productCart = shoppingCart.ProductCarts.Where(p => p.Product.ID == Id).FirstOrDefault();
-                if (productCart == null) shoppingCart.ProductCarts.Add(new ProductCart() { Count = ProductCount, Id = Id, Product = ProductItem });
+                if (productCart == null) shoppingCart.ProductCarts.Add(new ProductCart() { Count = ProductCount, Product = ProductItem, ProductId = Id });
                 else productCart.Count += ProductCount;
                 await localStorage.SetItemAsync("ShoppingCart", shoppingCart);
             }

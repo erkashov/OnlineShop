@@ -1,18 +1,4 @@
-﻿@code {
-    //[Parameter]
-    //public string Token { get; set; }
-    //protected override async Task OnInitializedAsync()
-    //{
-    //    await UserSessionService.SetUserData(UserSessionData);
-    //}
-    [Parameter]
-    public string Token { get; set; }
-
-    [Parameter]
-    public string IPAddress { get; set; }
-}
-<CascadingAuthenticationState>
-    <CascadingValue Name="Token" Value="@Token">
+﻿<CascadingAuthenticationState>
         <BootstrapBlazor.Components.BootstrapBlazorRoot>
             <Router AppAssembly="@typeof(App).Assembly">
                 <Found Context="routeData">
@@ -27,6 +13,5 @@
                 </NotFound>
             </Router>
         </BootstrapBlazor.Components.BootstrapBlazorRoot>
-    </CascadingValue>
 </CascadingAuthenticationState>
 <AntContainer />

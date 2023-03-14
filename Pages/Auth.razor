@@ -66,9 +66,14 @@
             var authResponce = await ShopLib.Auth.Login(Email, Password);
             if (authResponce.User != null)
             {
-
-                NavigationManag.NavigateTo($"/login?paramUsername={encode(Email)}&paramPassword={encode(Password)}", true);
-
+                HttpService<ShoppingCart>.SetToken(authResponce.Token);
+                ShoppingCart cart = await localStorage.GetItemAsync<ShoppingCart>("ShoppingCart");
+                if (cart != null)
+                {
+                    string result = await ShopingCartService.PostCart(cart, authResponce.Token);
+                }
+                await localStorage.SetItemAsync<ShoppingCart>("ShoppingCart", null);
+                NavigationManag.NavigateTo($"/login?token={encode(authResponce.Token)}", true);
             }
             else
             {

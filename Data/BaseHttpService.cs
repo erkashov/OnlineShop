@@ -7,7 +7,7 @@ namespace OnlineShop.Data
     public class BaseHttpService<T>
     {
         private static HttpClient _httpClient = new HttpClient();
-        private static readonly string _basePath = "http://localhost/api";
+        private static readonly string _basePath = "http://localhost:7082/api";
 
         public static async Task<List<T>> SendListAsync<T>(string action, HttpMethod method, object model = null)
         where T : class, new()
@@ -129,13 +129,19 @@ namespace OnlineShop.Data
     public class HttpService<T>
     {
         private static HttpClient _httpClient = new HttpClient();
-        private static readonly string _basePath = "http://localhost/api";
-
-        public static async Task<HttpResponce<List<T>>> SendListAsync<T>(string action, HttpMethod method, object model = null)
+        private static readonly string _basePath = "http://localhost:7082/api";
+        public static void SetToken(string token)
+        {
+            _httpClient.DefaultRequestHeaders.Accept.Clear();
+            _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        }
+        public static async Task<HttpResponce<List<T>>> SendListAsync<T>(string action, HttpMethod method, object model = null, string token = "")
         where T : class, new()
         {
             try
             {
+                if(token != "") SetToken(token); 
                 var uri = $"{_basePath}/{action}";
                 var message = CreateMessage(uri, method, model);
                 var response = await _httpClient.SendAsync(message);

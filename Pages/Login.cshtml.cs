@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using OnlineShop.Data;
 using OnlineShop.Models;
 using ShopLib;
 
@@ -33,10 +34,10 @@ namespace OnlineShop.Pages
             localStorage = storageService;
         }
 
-        public async Task<IActionResult> OnGetAsync(string paramUsername, string paramPassword)
+        public async Task<IActionResult> OnGetAsync(string token)
         {
-            var authResponce = await ShopLib.Auth.Login(paramUsername, paramPassword);
-            if (authResponce.User != null)
+            User? user = await ShopLib.Auth.GetUserByToken(token);
+            if (user != null)
             {
                 string returnUrl = Url.Content("~/");
                 try
@@ -45,8 +46,8 @@ namespace OnlineShop.Pages
                     await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
                 }
                 catch { }
-                var claims = new List<Claim> { new Claim(ClaimTypes.Name, paramUsername), new Claim(ClaimTypes.Role, "Customer"), 
-                                                new Claim("Id", authResponce.User.ID.ToString()), new Claim("Token", authResponce.Token) };
+                var claims = new List<Claim> { new Claim(ClaimTypes.Name, user.login), new Claim(ClaimTypes.Role, "Customer"), 
+                                                new Claim("Id", user.ID.ToString()), new Claim("Token", token) };
                 var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                 var authProperties = new AuthenticationProperties
                 {
@@ -65,7 +66,7 @@ namespace OnlineShop.Pages
                 {
                     string error = ex.Message;
                 }
-                Response.Cookies.Append("token", authResponce.Token);
+                
                 return LocalRedirect(returnUrl);
             }
             else

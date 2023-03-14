@@ -54,7 +54,7 @@
                     if (tokenClaim != null)
                     {
                         User? temp_user = await ShopLib.Auth.GetUserByToken(tokenClaim.Value);
-                        if (temp_user == null) NavigationManager.NavigateTo("/logout?returnUrl=/");
+                        if (temp_user == null) NavigationManager.NavigateTo("/logout?returnUrl=/", true);
                         else CurrentUser = temp_user;
                     }
                     else NavigationManager.NavigateTo("/logout?returnUrl=/", true);

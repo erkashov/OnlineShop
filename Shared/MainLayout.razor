@@ -6,17 +6,48 @@
 <div class="page">
     <HeaderComponent RoleCallback="@SetUser"></HeaderComponent>
     <main>
-        <article class="content px-1">
-            @Body
-        </article>
+        <CascadingValue Value="@Token" Name="Token">
+            <CascadingValue Value="@IsAuthorized" Name="IsAuthorized">
+                <article class="content px-1">
+                    @Body
+                </article>
+            </CascadingValue>
+        </CascadingValue>
     </main>
 </div>
 
 @code {
-    [Parameter] public User? CurrentUser { get; set; }
+    [Parameter]
+    public User? CurrentUser { get; set; }
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationState { get; set; }
+
+    public string Token { get; set; }
+    public bool IsAuthorized { get; set; } = false;
 
     public void SetUser(User? user)
     {
         CurrentUser = user;
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        if (authenticationState is not null)
+        {
+            var authState = await authenticationState;
+            var user = authState?.User;
+            if (user is not null)
+            {
+                if (user.Identity is not null && user.Identity.IsAuthenticated)
+                {
+                    var tokenClaim = user.FindFirst("Token");
+                    if (tokenClaim != null)
+                    {
+                        Token = tokenClaim.Value;
+                        IsAuthorized = true;
+                        HttpService<ShoppingCart>.SetToken(Token);
+                    }
+                }
+            }
+        }
     }
 }
