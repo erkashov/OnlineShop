@@ -15,9 +15,10 @@ namespace OnlineShop.Data
             return cart;
         }
 
-        public static async Task<string> SetCart(ShoppingCart cart)
+        public static async Task<string> SetCart(ShoppingCart cart, string token = "")
         {
-            var cartResult = await HttpService<string>.SendListAsync<ShoppingCart>("ShoppingCarts/"+ cart.Id, HttpMethod.Put, cart);
+            if (cart.Id == 0) return await PostCart(cart, token);
+            var cartResult = await HttpService<string>.SendListAsync<string>("ShoppingCarts/"+ cart.Id, HttpMethod.Put, cart, token);
             if (cartResult.HasErrors)
             {
                 return cartResult.Error;
@@ -32,6 +33,20 @@ namespace OnlineShop.Data
             {
                 return cartResult.Error;
             }
+            return "";
+        }
+
+        public static async Task<string> Checkout(string token)
+        {
+            var checkoutResult = await HttpService<string>.SendListAsync<ShoppingCart>("ShoppingCarts/checkout", HttpMethod.Get, null, token);
+            if(checkoutResult.HasErrors) return checkoutResult.Error;
+            return "";
+        }
+
+        public static async Task<string> DeleteProduct(int prodctId, string token)
+        {
+            var checkoutResult = await HttpService<string>.SendListAsync<ShoppingCart>("ShoppingCarts/" + prodctId, HttpMethod.Delete, null, token);
+            if (checkoutResult.HasErrors) return checkoutResult.Error;
             return "";
         }
     }

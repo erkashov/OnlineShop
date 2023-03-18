@@ -107,14 +107,17 @@ namespace OnlineShop.Data
     public class HttpResponce<T>
     {
         public string? Error { get; set; }
+        public bool IsSuccess { get; set; } = true;
         public T? Responce { get; set; }
         public HttpResponce(T res)
         {
             Responce = res;
         }
+        public HttpResponce() { }
         public HttpResponce(string res)
         {
             Error = res;
+            IsSuccess = false;
         }
 
         public bool HasErrors
@@ -137,7 +140,6 @@ namespace OnlineShop.Data
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         }
         public static async Task<HttpResponce<List<T>>> SendListAsync<T>(string action, HttpMethod method, object model = null, string token = "")
-        where T : class, new()
         {
             try
             {
@@ -149,7 +151,7 @@ namespace OnlineShop.Data
 
                 if (response.IsSuccessStatusCode)
                 {
-
+                    if (content == "") return new HttpResponce<List<T>>();
                     List<T> result = new List<T>();
                     T res;
                     try

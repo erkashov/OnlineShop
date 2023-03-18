@@ -1,4 +1,5 @@
 ﻿@inject Blazored.LocalStorage.ILocalStorageService localStorage
+@inject BootstrapBlazor.Components.ToastService ToastService
 
 <div class="product-card">
     <img src="../src/fanera-fk.jpg" class="product-card-image" />
@@ -16,17 +17,26 @@
 @code {
     [Parameter]
     public int Id { get; set; }
+
+    [CascadingParameter(Name = "Token")]
+    public string Token { get; set; }
+
+    [CascadingParameter(Name = "IsAuthorized")]
+    public bool IsAuthorized { get; set; }
+
     public Product Product { get; set; } = new Product();
     public bool IsAvailable { get; set; } = true;
 
     protected override async Task OnParametersSetAsync()
     {
+        int stock = await GlobalMethod.GetProductStock(Id);
+        IsAvailable = stock > 0;
         Product = (await BaseHttpService<Product>.SendListAsync<Product>("Tovary/" + Id, HttpMethod.Get)).FirstOrDefault();
     }
 
     private string GetPrice()
     {
-        if (Product.Prices != null && Product.Prices.FirstOrDefault() != null)
+        if (Product != null && Product.Prices != null && Product.Prices.FirstOrDefault() != null)
         {
             IsAvailable = true;
             return Product.Prices?.FirstOrDefault()?.price_nal + " руб/лист";
@@ -43,16 +53,28 @@
 
     private async Task AddToCart()
     {
-        ShoppingCart? shoppingCart = await localStorage.GetItemAsync<ShoppingCart>("ShoppingCart");
-        if (shoppingCart == null)
+        ShoppingCart? shoppingCart;
+        if (IsAuthorized)
         {
-            shoppingCart = new ShoppingCart();
+            shoppingCart = await ShopingCartService.GetCart();
         }
+        else
+        {
+            shoppingCart = await localStorage.GetItemAsync<ShoppingCart>("ShoppingCart");
+        }
+
+        if (shoppingCart == null) shoppingCart = new ShoppingCart();
+
         if (shoppingCart.ProductCarts == null) shoppingCart.ProductCarts = new List<ProductCart>();
         ProductCart? productCart = shoppingCart.ProductCarts.Where(p => p.Product.ID == Id).FirstOrDefault();
         if (productCart == null) shoppingCart.ProductCarts.Add(new ProductCart() { Count = 1, Product = Product, ProductId = Id });
         else productCart.Count += 1;
-        await localStorage.SetItemAsync("ShoppingCart", shoppingCart);
-        await Task.Delay(1000);
+
+        if (IsAuthorized)
+        {
+            string res = await ShopingCartService.SetCart(shoppingCart, Token);
+            //if (res != "") OnInfoClick(res);
+        }
+        else await localStorage.SetItemAsync("ShoppingCart", shoppingCart);
     }
 }

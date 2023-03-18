@@ -1,15 +1,21 @@
 ﻿<div class="sales-hits-container">
-<h1>Хиты продаж</h1>
-<div>
-    @for(int i=0; i<8; i++)
-    {
-        <div class="inline">
-            <ProductCardComponent Id="@i"></ProductCardComponent>
-        </div>
-    }
-</div>
+    <h1>Хиты продаж</h1>
+    <div>
+        @foreach(var prod in salesHits)
+        {
+            <div class="inline">
+                <ProductCardComponent Id="@prod.ID"></ProductCardComponent>
+            </div>
+        }
+    </div>
 </div>
 
 @code {
+    public List<Product> salesHits { get; set; } = new List<Product>();
 
+    protected override async Task OnInitializedAsync()
+    {
+        var salesHitsResp = await HttpService<Product>.SendListAsync<Product>("Tovary/salesHits", HttpMethod.Get);
+       if (!salesHitsResp.HasErrors) salesHits = salesHitsResp.Responce;
+    }
 }

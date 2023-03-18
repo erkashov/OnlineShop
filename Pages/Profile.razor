@@ -9,38 +9,36 @@
 @inject IJSRuntime JS;
 
 <PageTitle>Профиль</PageTitle>
-<AuthorizeView>
-    <Authorized>
-        <PageTitle>Профиль</PageTitle>
-        <div class="d-flex flex-row account">
-            <div class="d-flex flex-column account-data">
-                <h2>Личные данные</h2>
-                <BootstrapInput @bind-Value="@CurrentUser.surname" PlaceHolder="Фамилия" IsTrim="true" ShowLabel="true" DisplayText="Фамилия" />
-                <BootstrapInput @bind-Value="@CurrentUser.name" PlaceHolder="Имя" IsTrim="true" ShowLabel="true" DisplayText="Имя" />
-                <BootstrapInput @bind-Value="@CurrentUser.papaname" PlaceHolder="Отчество" IsTrim="true" ShowLabel="true" DisplayText="Отчество" />
-                <BootstrapInput @bind-Value="@CurrentUser.login" Formatter="@PhoneFormatter" PlaceHolder="Телефон" IsTrim="true" ShowLabel="true" DisplayText="Телефон" type='phone' />
+<div class="d-flex flex-row account">
+    <div class="d-flex flex-column account-data">
+        <h2>Личные данные</h2>
+        <BootstrapInput @bind-Value="@CurrentUser.surname" PlaceHolder="Фамилия" IsTrim="true" ShowLabel="true" DisplayText="Фамилия" />
+        <BootstrapInput @bind-Value="@CurrentUser.name" PlaceHolder="Имя" IsTrim="true" ShowLabel="true" DisplayText="Имя" />
+        <BootstrapInput @bind-Value="@CurrentUser.papaname" PlaceHolder="Отчество" IsTrim="true" ShowLabel="true" DisplayText="Отчество" />
+        <BootstrapInput @bind-Value="@CurrentUser.login" Formatter="@PhoneFormatter" PlaceHolder="Телефон" IsTrim="true" ShowLabel="true" DisplayText="Телефон" type='phone' />
 
-                <BootstrapBlazor.Components.Button OnClick=@SaveChanges>Сохранить</BootstrapBlazor.Components.Button>
-                <BootstrapBlazor.Components.Button OnClick=@Logout Color="BootstrapBlazor.Components.Color.Danger">Выйти</BootstrapBlazor.Components.Button>
-            </div>
-            <div class="d-flex flex-column">
-                <h2>Мои покупки</h2>
-
-            </div>
-        </div>
-    </Authorized>
-    <NotAuthorized>
-        <Redirect Url="/auth"></Redirect>
-    </NotAuthorized>
-</AuthorizeView>
+        <BootstrapBlazor.Components.Button OnClick=@SaveChanges>Сохранить</BootstrapBlazor.Components.Button>
+        <BootstrapBlazor.Components.Button OnClick=@Logout Color="BootstrapBlazor.Components.Color.Danger">Выйти</BootstrapBlazor.Components.Button>
+    </div>
+    <MyOrders></MyOrders>
+</div>
 
 @code {
     [CascadingParameter]
     private Task<AuthenticationState>? authenticationState { get; set; }
+
+    [CascadingParameter(Name = "Token")]
+    public string Token { get; set; }
+
+    [CascadingParameter(Name = "IsAuthorized")]
+    public bool IsAuthorized { get; set; }
+
     private static string PhoneFormatter(string source) => String.Format("{0:(###) ###-####}", source);
     public User CurrentUser { get; set; } = new User();
+
     protected override async Task OnInitializedAsync()
     {
+        if (!IsAuthorized) NavigationManager.NavigateTo("/auth");
         if (authenticationState is not null)
         {
             var authState = await authenticationState;
@@ -65,11 +63,16 @@
 
     private async Task SaveChanges()
     {
-        
+
     }
 
     private async Task Logout()
     {
         NavigationManag.NavigateTo($"/logout?returnUrl=/", true);
+    }
+
+    private Task OnChanged(CollapseItem item)
+    {
+        return Task.CompletedTask;
     }
 }

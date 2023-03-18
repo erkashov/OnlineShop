@@ -4,6 +4,7 @@
 @inject NavigationManager NavigationManager
 @inject Blazored.LocalStorage.ILocalStorageService localStorage
 @inject BootstrapBlazor.Components.SwalService SswalService
+@inject BootstrapBlazor.Components.ToastService ToastService
 
 <div class="d-flex flex-column">
     <h1 class="product-page-header">@ProductItem.Naim2</h1>
@@ -66,7 +67,14 @@
 @code {
     [Parameter]
     public int Id { get; set; }
-    public bool IsAvailable { get; set; } = true;
+
+    [CascadingParameter(Name = "Token")]
+    public string Token { get; set; }
+
+    [CascadingParameter(Name = "IsAuthorized")]
+    public bool IsAuthorized { get; set; }
+
+    public bool IsAvailable { get; set; } = false;
     public int ProductCount { get; set; } = 1;
 
     public ShopLib.Product ProductItem { get; set; } = new ShopLib.Product();
@@ -78,11 +86,12 @@
 
     private List<SelectedItem>? SortItems { get; set; } = new List<SelectedItem>();
     private List<SelectedItem>? TolItems { get; set; } = new List<SelectedItem>();
-    [Inject]
-    private BootstrapBlazor.Components.SwalService swalService { get; set; }
+
     protected override async Task OnParametersSetAsync()
     {
-        IsAvailable = Id % 2 == 0;
+        int stock = await GlobalMethod.GetProductStock(Id);
+        IsAvailable = stock > 0;
+
         ProductItem = (await BaseHttpService<ShopLib.Product>.SendListAsync<ShopLib.Product>("Tovary/" + Id, HttpMethod.Get)).FirstOrDefault();
         await GetProducts();
     }
@@ -98,7 +107,8 @@
         {
             return ProductItem.Prices?.FirstOrDefault()?.price_nal + " руб/лист";
         }
-        return "под заказ";
+        IsAvailable = false;
+        return "уточните у менеджера";
     }
 
     private async Task GetProducts()
@@ -133,16 +143,29 @@
             int stock = await GlobalMethod.GetProductStock(Id);
             if (stock >= ProductCount)
             {
-                ShoppingCart? shoppingCart = await localStorage.GetItemAsync<ShoppingCart>("ShoppingCart");
-                if (shoppingCart == null)
+                ShoppingCart? shoppingCart;
+                if (IsAuthorized)
                 {
-                    shoppingCart = new ShoppingCart();
+                    shoppingCart = await ShopingCartService.GetCart();
                 }
+                else
+                {
+                    shoppingCart = await localStorage.GetItemAsync<ShoppingCart>("ShoppingCart");
+                }
+
+                if (shoppingCart == null) shoppingCart = new ShoppingCart();
+
                 if (shoppingCart.ProductCarts == null) shoppingCart.ProductCarts = new List<ProductCart>();
                 ProductCart? productCart = shoppingCart.ProductCarts.Where(p => p.Product.ID == Id).FirstOrDefault();
                 if (productCart == null) shoppingCart.ProductCarts.Add(new ProductCart() { Count = ProductCount, Product = ProductItem, ProductId = Id });
                 else productCart.Count += ProductCount;
-                await localStorage.SetItemAsync("ShoppingCart", shoppingCart);
+
+                if (IsAuthorized)
+                {
+                    string res = await ShopingCartService.SetCart(shoppingCart, Token);
+                    if (res != "") OnInfoClick(res);
+                }
+                else await localStorage.SetItemAsync("ShoppingCart", shoppingCart);
             }
             else
             {
@@ -155,7 +178,7 @@
                         CloseButtonText = "Закрыть"
                     };
 
-                await swalService?.Show(op);
+                await SswalService?.Show(op);
                 ProductCount = stock;
             }
         }
@@ -189,5 +212,20 @@
         {
             NavigationManager.NavigateTo(prod.Link);
         }
+    }
+
+    private void OnInfoClick(string ex)
+    {
+        ToastService.Show(new BootstrapBlazor.Components.ToastOption()
+            {
+                // Notification category
+                Category = BootstrapBlazor.Components.ToastCategory.Error,
+
+                // Notification box Title value
+                Title = "Ошибка",
+
+                // Notification body content
+                Content = ex
+            });
     }
 }

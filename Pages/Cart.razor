@@ -8,6 +8,7 @@
 @inject NavigationManager NavigationManager
 @inject Blazored.LocalStorage.ILocalStorageService localStorage
 @inject BootstrapBlazor.Components.SwalService SswalService
+@inject BootstrapBlazor.Components.ToastService ToastService
 <PageTitle>Корзина</PageTitle>
 
 <h1>
@@ -29,7 +30,7 @@
                         <p>@context.Price</p>
                     </PropertyColumn>
                     <PropertyColumn Width="30%" Property="c=>c.Count" Title="Кол-во" Style="width:90px">
-                        <Input Type="number" @bind-Value="@context.Count" OnBlur="stopEdit" AutoFocus TValue="int" Min="1" Style="width:90px" />
+                        <Input Type="number" @bind-Value="@context.Count" OnBlur="stopEdit" TValue="int" Min="1" Style="width:90px" />
                     </PropertyColumn>
                     <PropertyColumn Property="c=>c.Summa" Title="Сумма" Width="90px">
                         <p>@context.Summa</p>
@@ -50,16 +51,16 @@
                 <div class="row g-3 form-inline">
                     <div class="col-12 col-md-4">
                         <BootstrapBlazor.Components.Switch OnColor="BootstrapBlazor.Components.Color.Success" OffColor="BootstrapBlazor.Components.Color.Secondary"
-                                                           OnText="Распил" OffText="Распил" @bind-Value="@ShoppingCart.HasRaspil" OnValueChanged=@OnValueChanged></BootstrapBlazor.Components.Switch>
+                                                           OnText="Распил" OffText="Распил" @bind-Value=@ShoppingCart.HasRaspil OnValueChanged=@OnValueChangedRaspil></BootstrapBlazor.Components.Switch>
                     </div>
                 </div>
                 @if (ShoppingCart.HasRaspil)
                 {
-                    <BootstrapBlazor.Components.BootstrapInput PlaceHolder="..." IsTrim="true" OnValueChanged="@OnValueChanged"
+                    <BootstrapBlazor.Components.BootstrapInput PlaceHolder="..." IsTrim="true" OnValueChanged="@OnValueChangedRaspilText"
                                                            TValue="string"
                                                            IsSelectAllTextOnFocus="true"
                                                            ShowLabel="true"
-                                                           @bind-Value="@ShoppingCart.RaspilScheme"
+                                                           @bind-Value=@ShoppingCart.RaspilScheme
                                                            DisplayText="Размеры распила" />
                     <div class="cart-itog-sum">
                         <h5>Стоимость</h5>
@@ -72,25 +73,25 @@
             <div class="d-flex flex-column cart-delivery">
                 <div class="cart-delivery">
                     <h4>Способ оплаты</h4>
-                    <BootstrapBlazor.Components.RadioList TValue="int" OnSelectedChanged=@OnSelectedChanged @bind-Value="@ShoppingCart.PaymentType"
+                    <BootstrapBlazor.Components.RadioList TValue="int" OnSelectedChanged=@OnSelectedChangedTypeOplaty @bind-Value=@ShoppingCart.PaymentType
                                                           Items="@PayersTypes" IsVertical="true"></BootstrapBlazor.Components.RadioList>
 
                 </div>
                 <div class="cart-delivery">
                     <h4>Доставка</h4>
-                    <BootstrapBlazor.Components.RadioList TValue="int" @bind-Value="@ShoppingCart.DeliveryType" OnSelectedChanged=@OnSelectedChanged
+                    <BootstrapBlazor.Components.RadioList TValue="int" @bind-Value=@ShoppingCart.DeliveryType OnSelectedChanged=@OnSelectedChangedDelivery
                                                           Items="@DelivTypes" IsVertical="true"></BootstrapBlazor.Components.RadioList>
                     @if (ShoppingCart.HasDelivery)
                     {
-                        <BootstrapBlazor.Components.BootstrapInput PlaceHolder="..." IsTrim="true" OnValueChanged="@OnValueChanged"
+                        <BootstrapBlazor.Components.BootstrapInput PlaceHolder="..." IsTrim="true" OnValueChanged="@OnValueChangedDelAddress"
                                                                TValue="string"
                                                                IsSelectAllTextOnFocus="true"
                                                                ShowLabel="true"
-                                                               @bind-Value="@ShoppingCart.Delivery.DeliveryAddress"
+                                                               @bind-Value=@ShoppingCart.Delivery.DeliveryAddress
                                                                DisplayText="Введите адрес" />
                         <BootstrapBlazor.Components.DateTimePicker TValue="DateTime" MinValue="@DateTime.Now" MaxValue="@DateTime.Now.AddDays(10)"
                                                                OnValueChanged="@OnDateValueChanged"
-                                                               @bind-Value="@ShoppingCart.Delivery.DeliveryDate"
+                                                               @bind-Value=@ShoppingCart.Delivery.DeliveryDate
                                                                DisplayText="Дата и время доставки" ShowLabel="true" ViewMode="BootstrapBlazor.Components.DatePickerViewMode.DateTime"
                                                                Format="dd.MM.yyyy HH:mm:ss"></BootstrapBlazor.Components.DateTimePicker>
                         <div class="cart-itog-sum">
@@ -124,7 +125,15 @@
                     </div>
                 </div>
             </div>
-            <BootstrapBlazor.Components.Button OnClick="@(e => OnSwal())"><h3 style="color: #fff;">Оформить</h3></BootstrapBlazor.Components.Button>
+            <AuthorizeView>
+                <Authorized>
+                    <BootstrapBlazor.Components.Button OnClick="@CheckOut"><h3 style="color: #fff;">Оформить</h3></BootstrapBlazor.Components.Button>
+                </Authorized>
+                <NotAuthorized>
+                    <BootstrapBlazor.Components.Button OnClick="@AuthClick"><h3 style="color: #fff;">Войти в аккаунт</h3></BootstrapBlazor.Components.Button>
+                </NotAuthorized>
+            </AuthorizeView>
+
         </div>
 
     </div>
@@ -201,6 +210,7 @@
 @code {
     [CascadingParameter(Name = "Token")]
     public string Token { get; set; }
+
     [CascadingParameter(Name = "IsAuthorized")]
     public bool IsAuthorized { get; set; }
 
@@ -217,32 +227,20 @@
             new BootstrapBlazor.Components.SelectedItem{ Value =  "1", Text =  "Самовывоз со склада" },
             new BootstrapBlazor.Components.SelectedItem{ Value =  "2", Text =  "Доставка" }};
 
+    private bool loading { get; set; } = true;
 
-    bool loading = true;
     [Inject]
     private BootstrapBlazor.Components.SwalService swalService { get; set; }
+    [Inject]
+    private BootstrapBlazor.Components.ToastService? ToastServic { get; set; }
 
     private BootstrapBlazor.Components.Modal? SmailModal { get; set; }
-
-    protected override async Task OnInitializedAsync()
-    {
-        ShoppingCart = new ShoppingCart();
-    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            //if (IsAuthorized)
-            //{
-            //    ShoppingCart = await ShopingCartService.GetCart();
-            //}
-            //else
-            //{
-                ShoppingCart = await localStorage.GetItemAsync<ShoppingCart>("ShoppingCart");
-            //}
-
-            if (ShoppingCart == null) ShoppingCart = new ShoppingCart();
+            await GetCart();
             await SetCart();
             StateHasChanged();
             await CheckStock();
@@ -251,8 +249,9 @@
 
     private async Task DeleteRow(int id)
     {
-        ShoppingCart.ProductCarts = ShoppingCart.ProductCarts.Where(d => d.ProductId != id).ToList();
-        await SetCart();
+        string res = await ShopingCartService.DeleteProduct(id, Token);
+        if (res != "") OnInfoClick(res);
+        await GetCart();
     }
 
     private async Task StartEdit(int id)
@@ -267,64 +266,43 @@
         SetCart();
     }
 
-    protected override void OnInitialized()
-    {
-    }
-
     private async Task SetCart()
     {
-        //if (IsAuthorized)
-        //{
-        //    await ShopingCartService.SetCart(ShoppingCart);
-        //}
-        //else 
-        await localStorage.SetItemAsync("ShoppingCart", ShoppingCart);
+        if (IsAuthorized)
+        {
+            string res = await ShopingCartService.SetCart(ShoppingCart, Token);
+            if (res != "") OnInfoClick(res);
+        }
+        else await localStorage.SetItemAsync("ShoppingCart", ShoppingCart);
+        //await GetCart();
+        StateHasChanged();
     }
 
-
-    private void CheckOut()
+    private async Task GetCart()
     {
-        CheckStock();
-        //что то
-        //NavigationManager.NavigateTo("/checkout");
+        if (IsAuthorized)
+        {
+            ShoppingCart = await ShopingCartService.GetCart();
+        }
+        else
+        {
+            ShoppingCart = await localStorage.GetItemAsync<ShoppingCart>("ShoppingCart");
+        }
+
+        if (ShoppingCart == null) ShoppingCart = new ShoppingCart();
     }
 
-    private async Task OnItemChangedString(BootstrapBlazor.Components.CheckboxState state, bool value)
-    {
-        await SetCart();
-    }
-
-    private async Task OnValueChanged(object value)
-    {
-        await SetCart();
-    }
-
-    private async Task OnValueChanged(bool value)
-    {
-        await SetCart();
-    }
-
-    private async Task OnDateValueChanged(DateTime value)
-    {
-        await SetCart();
-    }
-
-    private async Task OnSwal()
+    private async Task CheckOut()
     {
         await CheckStock();
         if (changedCount.Count == 0)
         {
-            var op = new BootstrapBlazor.Components.SwalOption()
-                {
-                    Category = BootstrapBlazor.Components.SwalCategory.Success,
-                    Title = "Заказ оформлен",
-                    Content = "Дождитесь подтвержения менеджера",
-                    ShowClose = true,
-                    CloseButtonText = "Закрыть"
-                };
-
-            await swalService?.Show(op);
+            string res = await ShopingCartService.Checkout(Token);
+            if (res == "") await Message("Заказ оформлен", BootstrapBlazor.Components.SwalCategory.Success, "Дождитесь подтвержения менеджера");
+            else OnInfoClick(res);
         }
+        //что то
+        //NavigationManager.NavigateTo("/checkout");
     }
 
     private async Task CheckStock()
@@ -362,9 +340,82 @@
         StateHasChanged();
     }
 
-    private async Task<Task> OnSelectedChanged(IEnumerable<BootstrapBlazor.Components.SelectedItem> items, int value)
+    private void AuthClick()
+    {
+        NavigationManager.NavigateTo("/auth");
+    }
+
+    private async Task<Task> OnItemChangedString(BootstrapBlazor.Components.CheckboxState state, bool value)
     {
         await SetCart();
         return Task.CompletedTask;
+    }
+
+    private async Task<Task> OnValueChangedRaspilText(string value)
+    {
+        await SetCart();
+        return Task.CompletedTask;
+    }
+    private async Task OnValueChangedRaspil(bool value)
+    {
+        await SetCart();
+    }
+    private async Task<Task> OnValueChangedDelAddress(object value)
+    {
+        await SetCart();
+        return Task.CompletedTask;
+    }
+    private async Task<Task> OnValueChanged(bool value)
+    {
+        await SetCart();
+        return Task.CompletedTask;
+    }
+
+    private async Task<Task> OnDateValueChanged(DateTime value)
+    {
+        await SetCart();
+        return Task.CompletedTask;
+    }
+
+    private async Task<Task> OnSelectedChangedTypeOplaty(IEnumerable<BootstrapBlazor.Components.SelectedItem> items, int value)
+    {
+        await SetCart();
+        return Task.CompletedTask;
+    }
+
+    private async Task<Task> OnSelectedChangedDelivery(IEnumerable<BootstrapBlazor.Components.SelectedItem> items, int value)
+    {
+        if (ShoppingCart.HasDelivery && ShoppingCart.Delivery is null) ShoppingCart.Delivery = new Delivery();
+        //await SetCart();
+        return Task.CompletedTask;
+    }
+
+    private async Task Message(string title, BootstrapBlazor.Components.SwalCategory categ, string message)
+    {
+        var op = new BootstrapBlazor.Components.SwalOption()
+            {
+                Category = categ,
+                Title = title,
+                Content = message,
+                ShowClose = true,
+                CloseButtonText = "Закрыть"
+            };
+
+        await swalService?.Show(op);
+    }
+
+    private void OnInfoClick(string ex)
+    {
+        ToastService.Show(new BootstrapBlazor.Components.ToastOption()
+            {
+                // Notification category
+                Category = BootstrapBlazor.Components.ToastCategory.Error,
+
+                // Notification box Title value
+                Title = "Ошибка",
+
+                // Notification body content
+                Content = ex
+            });
     }
 }

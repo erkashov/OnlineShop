@@ -1,0 +1,87 @@
+﻿@inject NavigationManager NavigationManager
+@using BootstrapBlazor.Components
+
+<div class="d-flex flex-column">
+    <h2>Мои заказы</h2>
+    <div class="cart-delivery">
+        @foreach (var order in Orders)
+        {
+            <div class="cart-delivery">
+                <h3>Заказ № @order.nom_rash от @order.date_rash.ToShortDateString()</h3>
+                <div class="container">
+                    <div class="row">
+                        <div class="col-5">
+                            Статуc
+                        </div>
+                        <div class="col-5">
+                            @order.Status
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-5">
+                            Дата оформления
+                        </div>
+                        <div class="col-5">
+                            @order.date_sozdania.ToString()
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-5">
+                            Способ оплаты
+                        </div>
+                        <div class="col-5">
+                            @order.Type_oplaty.naim
+                        </div>
+                    </div>
+                </div>
+                <BootstrapBlazor.Components.Collapse>
+                    <CollapseItems>
+                        <CollapseItem Text="Товары">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Товар</th>
+                                        <th>Цена</th>
+                                        <th>Кол-во</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var order in order.Sklad_rashod_tov)
+                                    {
+                                        <tr>
+                                            <th scope="row"><a href=@order.Tovar.Link>@order.Tovar.Naim2</a></th>
+                                            <td>@order.price</td>
+                                            <td>@order.count</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </CollapseItem>
+                    </CollapseItems>
+                </BootstrapBlazor.Components.Collapse>
+            </div>
+        }
+
+    </div>
+</div>
+@code {
+    [CascadingParameter(Name = "Token")]
+    public string Token { get; set; }
+
+    [CascadingParameter(Name = "IsAuthorized")]
+    public bool IsAuthorized { get; set; }
+
+    private List<Sklad_rashod> Orders { get; set; } = new List<Sklad_rashod>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!IsAuthorized) NavigationManager.NavigateTo("/auth");
+        if (IsAuthorized)
+        {
+            var orders_resp = await HttpService<Sklad_rashod>.SendListAsync<Sklad_rashod>("Sklad_rashod/myorders", HttpMethod.Get, null, Token);
+            if (orders_resp.Responce != null) Orders = orders_resp.Responce;
+        }
+    }
+}
