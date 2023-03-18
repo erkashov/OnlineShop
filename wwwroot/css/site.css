@@ -116,12 +116,24 @@ a {
 }
 
 .nav-bar {
+    /* «включаем» FlexBox режим */
     display: flex;
-    flex-direction: row;
+    /* Размещаем элементы внутри шапки */
+    justify-content: space-between;
+    /* Выравниваем элементы вертикально посередине*/
     align-items: center;
-    padding: 0px;
-    gap: 30px;
-    margin-bottom: 20px;
+}
+
+@media (max-width: 1000px) {
+    .nav-bar {
+        /* Изменяем направление оси в шапке на вертикальное */
+        flex-direction: column;
+        /* Выравниваем элементы в «шапке» влево */
+        align-items: flex-start;
+    }
+    .logo-container {
+        margin: auto;
+    }
 }
 
 .icons {
