@@ -5,23 +5,28 @@
 @inject IHttpContextAccessor httpContextAccessor
 @inject Blazored.LocalStorage.ILocalStorageService localStorage
 @inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
 @using BootstrapBlazor.Components
+@using Microsoft.AspNetCore.Components.Web
 @inject IJSRuntime JS;
 @inject BootstrapBlazor.Components.SwalService SswalService
+@inject BootstrapBlazor.Components.ToastService ToastService
 
 <PageTitle>Регистрация</PageTitle>
 <div class="d-flex flex-column center-div gap-20">
     <h1>Регистрация</h1>
-    <ValidateForm Model="@CurrentUser">
-        <div class="d-flex flex-column center-div gap-20">
-            <div> <BootstrapInput @bind-Value="@CurrentUser.surname" PlaceHolder="Фамилия" IsTrim="true" DisplayText="Фамилия" /></div>
-             <div><BootstrapInput @bind-Value="@CurrentUser.name" PlaceHolder="Имя" IsTrim="true" ShowLabel="true" DisplayText="Имя" /></div>
-             <div><BootstrapInput @bind-Value="@CurrentUser.papaname" PlaceHolder="Отчество" IsTrim="true" ShowLabel="true" DisplayText="Отчество" /></div>
-             <div><BootstrapInput @bind-Value="@CurrentUser.login" PlaceHolder="Телефон" IsTrim="true" ShowLabel="true" DisplayText="Телефон" type='phone' /></div>
-             <div><BootstrapInput @bind-Value="@CurrentUser.password" PlaceHolder="Пароль" IsTrim="true" ShowLabel="true" DisplayText="Пароль" type="password" /></div>
-            <BootstrapBlazor.Components.Button ButtonType="BootstrapBlazor.Components.ButtonType.Submit" IsAsync="true" OnClick=@Regist>Войти</BootstrapBlazor.Components.Button>
+    <div class="d-flex flex-column center-div gap-20">
+        <div> <BootstrapInput @bind-Value="@CurrentUser.surname" PlaceHolder="Фамилия" IsTrim="true" DisplayText="Фамилия" /></div>
+        <div><BootstrapInput @bind-Value="@CurrentUser.name" PlaceHolder="Имя" IsTrim="true" ShowLabel="true" DisplayText="Имя" /></div>
+        <div><BootstrapInput @bind-Value="@CurrentUser.papaname" PlaceHolder="Отчество" IsTrim="true" ShowLabel="true" DisplayText="Отчество" /></div>
+        <div>
+            <label for="phone-mask" class="form-label">Телефон</label>
+            <input @bind="@CurrentUser.login" type="tel" id="phone-mask" class="form-control modified" placeholder="+7(000)000-00-00" />
         </div>
-    </ValidateForm>
+        <div><BootstrapInput @bind-Value="@CurrentUser.password" PlaceHolder="Пароль" IsTrim="true" ShowLabel="true" DisplayText="Пароль" type="password" /></div>
+
+        <BootstrapBlazor.Components.Button ButtonType="BootstrapBlazor.Components.ButtonType.Submit" IsAsync="true" OnClick=@Regist>Войти</BootstrapBlazor.Components.Button>
+    </div>
 </div>
 
 @code {
@@ -34,41 +39,61 @@
     {
         if (CurrentUser.Validate())
         {
-            CurrentUser.role = "Customer";
-            var res = await HttpService<User>.SendListAsync<User>("Users", HttpMethod.Post, CurrentUser);
-            if (res.HasErrors)
+            if (CurrentUser.ValidatePhone())
             {
-                var op = new BootstrapBlazor.Components.SwalOption()
+                CurrentUser.role = "Customer";
+                var res = await HttpService<User>.SendListAsync<User>("Users", HttpMethod.Post, CurrentUser);
+                if (res.HasErrors)
+                {
+                    ErrorMessage("Ошибка запроса " + res.Error);
+                }
+                else
+                {
+                    var authResponce = await ShopLib.Auth.Login(CurrentUser.login, CurrentUser.password);
+                    if (authResponce.User != null)
                     {
-                        Category = BootstrapBlazor.Components.SwalCategory.Error,
-                        Title = "Ошибка запроса",
-                        Content = res.Error,
-                        ShowClose = true,
-                        CloseButtonText = "Закрыть"
-                    };
-
-                await swalService?.Show(op);
+                        ShoppingCart cart = await localStorage.GetItemAsync<ShoppingCart>("ShoppingCart");
+                        if (cart != null)
+                        {
+                            string result = await ShopingCartService.PostCart(cart, authResponce.Token);
+                        }
+                        await localStorage.SetItemAsync<ShoppingCart>("ShoppingCart", null);
+                        NavigationManag.NavigateTo($"/login?token={encode(authResponce.Token)}", true);
+                    }
+                }
             }
-            else
-            {
-                NavigationManager.NavigateTo($"/login?paramUsername={encode(CurrentUser.login)}&paramPassword={encode(CurrentUser.password)}", true);
-            }
+            else ErrorMessage("Номер телефона указан неверно");
         }
         else
         {
-            var op = new BootstrapBlazor.Components.SwalOption()
-                {
-                    Category = BootstrapBlazor.Components.SwalCategory.Error,
-                    Title = "Заполните все поля",
-                    ShowClose = true,
-                    CloseButtonText = "Закрыть"
-                };
+            ErrorMessage("Заполните все поля");
+        }
+    }
 
-            await swalService?.Show(op);
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("masks");
         }
     }
     private string encode(string param)
     {
         return HttpUtility.UrlEncode(param);
+    }
+
+    private void ErrorMessage(string ex)
+    {
+        ToastService.Show(new BootstrapBlazor.Components.ToastOption()
+            {
+                // Notification category
+                Category = BootstrapBlazor.Components.ToastCategory.Error,
+
+                // Notification box Title value
+                Title = "Ошибка",
+
+                // Notification body content
+                Content = ex
+            });
     }
 }

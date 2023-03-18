@@ -1,13 +1,7 @@
-﻿function JSAlert() {
-    alert("Hello");
-}
+﻿window.masks = () => {
 
-
-<script>
-	$('.mask-phone').mask('+7 (999) 999-99-99');
-</script>
-
-function getCookie(name) {
-	var matches = document.cookie.match(new RegExp("(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"));
-	return matches ? decodeURIComponent(matches[1]) : undefined;
-}
+    var phoneMask = IMask(
+        document.getElementById('phone-mask'), {
+        mask: '+{7}(000)000-00-00'
+    });
+};

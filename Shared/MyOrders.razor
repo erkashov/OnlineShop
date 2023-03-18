@@ -3,10 +3,18 @@
 
 <div class="d-flex flex-column">
     <h2>Мои заказы</h2>
-    <div class="cart-delivery">
-        @foreach (var order in Orders)
+    <div class="my-orders">
+        @if (Orders.Count == 0)
         {
-            <div class="cart-delivery">
+            <div style="margin: 0 auto;">
+                <h3>Заказов пока нет</h3>
+                <a href="/catalog">Спешите за товарами</a>
+            </div>
+        }
+        else
+        {
+            @foreach (var order in Orders)
+            {
                 <h3>Заказ № @order.nom_rash от @order.date_rash.ToShortDateString()</h3>
                 <div class="container">
                     <div class="row">
@@ -61,9 +69,8 @@
                         </CollapseItem>
                     </CollapseItems>
                 </BootstrapBlazor.Components.Collapse>
-            </div>
+            }
         }
-
     </div>
 </div>
 @code {

@@ -240,15 +240,28 @@ a {
     margin: 0 auto;
 }
 
+.center-div-column {
+    margin: 0 auto;
+}
+
 .account {
     display: flex;
     gap: 20px;
-    margin-left: auto;
 }
 
 .account-data {
     display: flex;
     gap: 10px;
+}
+
+.my-orders {
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+    gap: 10px;
+    border-radius: 12px;
+    width: 600px;
+    background-color: #8ee4af;
 }
 
 .product-page-options {
