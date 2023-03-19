@@ -13,9 +13,8 @@
     Каталог
 </h1>
 
-<div class="d-flex flex-row">
+<div class="adaptive-container">
     <div class="d-flex flex-column filter-container">
-
         @foreach (Category category in Categories)
         {
             string href = "/catalog/" + category.path;
@@ -32,8 +31,8 @@
         @if (CategoryName != null && Categories.Where(p => p.path == CategoryName).FirstOrDefault() != null)
         {
             <h3>Фильтр</h3>
-            <CheckboxList TValue="string" @bind-Value="@SortsFilter" Items="@SortItems" ShowLabel="true" DisplayText="Сорт" ShowBorder='false' IsVertical='true' OnSelectedChanged="@OnSelectedChanged" onclick=@GetProducts/>
-            <CheckboxList TValue="string" @bind-Value="@ThicknessFilter" Items="@TolItems" ShowLabel="true" DisplayText="Толщина" ShowBorder='false' IsVertical='true' onclick=@GetProducts/>
+            <CheckboxList TValue="string" @bind-Value="@SortsFilter" Items="@SortItems" ShowLabel="true" DisplayText="Сорт" ShowBorder='false' IsVertical='true' OnSelectedChanged="@OnSelectedChanged" onclick=@GetProducts />
+            <CheckboxList TValue="string" @bind-Value="@ThicknessFilter" Items="@TolItems" ShowLabel="true" DisplayText="Толщина" ShowBorder='false' IsVertical='true' onclick=@GetProducts />
 
         }
     </div>
@@ -43,15 +42,23 @@
             <PageTitle>Поиск @Search</PageTitle>
             <h3>Поиск @Search</h3>
         }
-        <ListView TItem="ShopLib.Product" Items="@Products">
-            <BodyTemplate>
-                <BootstrapBlazor.Components.Card>
-                     <BodyTemplate>
-                        <ProductCardComponent Id="@context.ID"></ProductCardComponent>
-                     </BodyTemplate>
-                </BootstrapBlazor.Components.Card>
-            </BodyTemplate>
-        </ListView>
+        <div>
+            @if (Products == null || Products.Count == 0)
+            {
+                <div class="" style="display: block;">
+                    <div style="height: 300px; display: block; margin-right: auto;text-align: center;vertical-align: middle;line-height: 300px;display: block;">
+                        <a href="/catalog"><h3>Товары по заданными параметрам не найдены</h3></a>
+                    </div>
+                </div>
+            }
+            else
+            {
+                @foreach (var prod in Products)
+                {
+                    <div class="inline"><ProductCardComponent Id="@prod.ID"></ProductCardComponent></div>
+                }
+            }
+        </div>
     </div>
 </div>
 
@@ -83,7 +90,7 @@
     private List<SelectedItem>? SortItems { get; set; } = new List<SelectedItem>();
     private List<SelectedItem>? TolItems { get; set; } = new List<SelectedItem>();
 
-    private ObservableCollection<ShopLib.Product>? Products { get; set; }
+    private ObservableCollection<ShopLib.Product> Products { get; set; } = new ObservableCollection<ShopLib.Product>();
 
     public Catalog()
     {
@@ -150,5 +157,6 @@
         filter.CategoryId = SelectedCategory != null ? SelectedCategory.ID : 0;
         filter.Search = Search != null ? Search : "";
         Products = new ObservableCollection<ShopLib.Product>(await BaseHttpService<ShopLib.Product>.SendListAsync<ShopLib.Product>("Tovary/Filter", HttpMethod.Post, filter));
+        if (Products == null) Products = new ObservableCollection<ShopLib.Product>();
     }
 }
