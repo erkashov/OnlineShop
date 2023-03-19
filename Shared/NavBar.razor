@@ -1,32 +1,49 @@
-﻿<div class="nav-bar">
-    <div class="logo-container">
-        <a class="logo" href="/"></a>
-    </div>
-    <div class="d-flex flex-row gap-20">
-        <NavLink href="/catalog">
-            <BootstrapBlazor.Components.Button>Каталог</BootstrapBlazor.Components.Button>
-        </NavLink>
-        <BootstrapBlazor.Components.BootstrapInput @bind-Value="@Search" PlaceHolder="Поиск" IsTrim="true" OnEnterAsync="OnEnterAsync"/>
-    </div>
-    <div class="d-flex flex-row child">
-        <div>
-            <a href="/cart">
-                <Icon Type="shopping-cart" Theme="outline" class="icons" />
-            </a>
+﻿@using BootstrapBlazor.Components
+<nav class="navbar navbar-expand-lg" >
+    <a class="navbar-brand logo" href="/"></a>
+
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo02" aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
+        <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+            <li class="nav-item">
+                <div class="d-flex gap-20" style="justify-content: space-between;">
+                    <NavLink href="/catalog">
+                        <BootstrapBlazor.Components.Button style="font-size: 20px;">Каталог</BootstrapBlazor.Components.Button>
+                    </NavLink>
+                    <div class="d-flex">
+                        <BootstrapBlazor.Components.BootstrapInput @bind-Value="@Search" PlaceHolder="Поиск" IsTrim="true" OnEnterAsync="OnEnterAsync" style="max-width: 250px;" />
+                        <BootstrapBlazor.Components.Button OnClick="SearchClick"><Icon Type="search" Theme="outline" class="icons" /></BootstrapBlazor.Components.Button>
+                    </div>
+                </div>
+            </li>
+        </ul>
+        <div class="d-flex flex-row child my-2 my-lg-0">
+            <div class="d-flex flex-row child my-2 my-lg-0">
+                <a href="/cart">
+                    <Icon Type="shopping-cart" Theme="outline" class="icons" />
+                </a>
+                <a href="/profile">
+                    <Icon Type="user" Theme="outline" class="icons" />
+                </a>
+            </div>
         </div>
-        <div>
-            <a href="/profile">
-                <Icon Type="user" Theme="outline" class="icons" />
-            </a>
-        </div>
     </div>
-</div>
+</nav>
 
 @code {
     public string Search { get; set; }
 
     private async Task OnEnterAsync(string val)
     {
-        NavigationManag.NavigateTo($"catalog?search=" + Search);
+        if (Search != "") NavigationManag.NavigateTo($"catalog?search=" + Search);
+    }
+
+    private async Task SearchClick()
+    {
+        OnEnterAsync(Search);
     }
 }
+
