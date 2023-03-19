@@ -47,25 +47,24 @@
                 <BootstrapBlazor.Components.Collapse>
                     <CollapseItems>
                         <CollapseItem Text="Товары">
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>Товар</th>
-                                        <th>Цена</th>
-                                        <th>Кол-во</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var order in order.Sklad_rashod_tov)
-                                    {
-                                        <tr>
-                                            <th scope="row"><a href=@order.Tovar.Link>@order.Tovar.Naim2</a></th>
-                                            <td>@order.price</td>
-                                            <td>@order.count</td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
+                            @foreach (var order in order.Sklad_rashod_tov)
+                            {
+                                <div class="d-flex flex-row gap-20">
+                                    <div><Image Src="../src/fanera-fk.jpg" class="product-cart-image"></Image></div>
+                                    <div class="gap-20 adaptive-container">
+                                        <div class="cart-product-name">
+                                            <NavLink href=@order.Tovar.Link><p>@order.Tovar.Naim2</p></NavLink>
+                                        </div>
+                                        <div class="d-flex flex-row gap-20">
+                                            <div>
+                                                <div class="cart-product-price">@order.Summa руб</div>
+                                                <p style="font-size:medium">@order.price руб/лист</p>
+                                                <p style="font-size:medium">@order.count шт</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
                         </CollapseItem>
                     </CollapseItems>
                 </BootstrapBlazor.Components.Collapse>

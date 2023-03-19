@@ -16,7 +16,7 @@
 </h1>
 
 <Spin Spinning=loading Delay=500>
-    <div class="d-flex flex-row">
+    <div class="adaptive-container">
         @if (ShoppingCart.ProductCarts.Count == 0)
         {
             <div class="" style="display: block;">
@@ -29,33 +29,32 @@
         {
             <div class="d-flex flex-column gap-20">
                 <div class="cart-delivery">
-                    <Table DataSource="ShoppingCart.ProductCarts" RowClassName="@(_=>"editable-row")" Bordered PaginationPosition="None">
-                        <PropertyColumn Property="c=>c.Product.zvet" Title="">
-                            <Image Src="../src/fanera-fk.jpg" class="product-cart-image"></Image>
-                        </PropertyColumn>
-                        <PropertyColumn Property="c=>c.Product.Naim2" Title="Товар" Width="200px">
-                            <NavLink href=@context.Product.Link>@context.Product.Naim2</NavLink>
-                        </PropertyColumn>
-                        <PropertyColumn Property="c=>c.Price" Title="Цена" Width="90px">
-                            <p>@context.Price</p>
-                        </PropertyColumn>
-                        <PropertyColumn Width="30%" Property="c=>c.Count" Title="Кол-во" Style="width:90px">
-                            <Input Type="number" @bind-Value="@context.Count" OnBlur="stopEdit" TValue="int" Min="1" Style="width:90px" />
-                        </PropertyColumn>
-                        <PropertyColumn Property="c=>c.Summa" Title="Сумма" Width="90px">
-                            <p>@context.Summa</p>
-                        </PropertyColumn>
-                        <ActionColumn Title="">
-                            <Popconfirm Title="Удалить?"
-                                    OnConfirm="()=> DeleteRow(context.ProductId)"
-                                    OkText="Yes"
-                                    CancelText="No">
-                                <a href="/cart">
-                                    <Icon Type="close" Theme="outline" class="icons" />
-                                </a>
-                            </Popconfirm>
-                        </ActionColumn>
-                    </Table>
+                    @foreach (var prodCart in ShoppingCart.ProductCarts)
+                    {
+                        <div class="d-flex flex-row gap-20">
+                            <div><Image Src="../src/fanera-fk.jpg" class="product-cart-image"></Image></div>
+                            <div class="gap-20 adaptive-container">
+                                <div class="cart-product-name">
+                                    <NavLink href=@prodCart.Product.Link><p>@prodCart.Product.Naim2</p></NavLink>
+                                </div>
+                                <div class="d-flex flex-row gap-20">
+                                    <div>
+                                        <div class="cart-product-price">@prodCart.Summa руб</div>
+                                        <p style="font-size:medium">@prodCart.Price руб/лист</p>
+                                        <div><Input Type="number" @bind-Value="@prodCart.Count" OnBlur="stopEdit" TValue="int" Min="1" Style="width:70px" /></div>
+                                    </div>
+                                    <Popconfirm Title="Удалить?"
+                                        OnConfirm="()=> DeleteRow(prodCart.ProductId)"
+                                        OkText="Yes"
+                                        CancelText="No">
+                                        <a href="/cart">
+                                            <Icon Type="close" Theme="outline" class="icons" />
+                                        </a>
+                                    </Popconfirm>
+                                </div>
+                            </div>
+                        </div>
+                    }
                 </div>
                 <div class="cart-delivery">
                     <div class="row g-3 form-inline">
@@ -81,13 +80,13 @@
             </div>
             <div class="d-flex flex-column cart-itog">
                 <div class="d-flex flex-column cart-delivery">
-                    <div class="cart-delivery">
+                    <div>
                         <h4>Способ оплаты</h4>
                         <BootstrapBlazor.Components.RadioList TValue="int" OnSelectedChanged=@OnSelectedChangedTypeOplaty @bind-Value=@ShoppingCart.PaymentType
                                                           Items="@PayersTypes" IsVertical="true"></BootstrapBlazor.Components.RadioList>
 
                     </div>
-                    <div class="cart-delivery">
+                    <div>
                         <h4>Доставка</h4>
                         <BootstrapBlazor.Components.RadioList TValue="int" @bind-Value=@ShoppingCart.DeliveryType OnSelectedChanged=@OnSelectedChangedDelivery
                                                           Items="@DelivTypes" IsVertical="true"></BootstrapBlazor.Components.RadioList>
