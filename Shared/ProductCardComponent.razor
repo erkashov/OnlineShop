@@ -2,7 +2,7 @@
 @inject BootstrapBlazor.Components.ToastService ToastService
 
 <div class="product-card">
-    <img src="../src/fanera-fk.jpg" class="product-card-image" />
+    <img src=@Product.FullImageLink class="product-card-image" />
     <span class="product-card-price">@GetPrice()</span>
     <NavLink href=@GetHref() class="product-card-price">@Product.Naim2</NavLink>
     @if (IsAvailable)
@@ -25,7 +25,7 @@
     public bool IsAuthorized { get; set; }
 
     public Product Product { get; set; } = new Product();
-    public bool IsAvailable { get; set; } = true;
+    public bool IsAvailable { get; set; } = false;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -38,7 +38,6 @@
     {
         if (Product != null && Product.Prices != null && Product.Prices.FirstOrDefault() != null)
         {
-            IsAvailable = true;
             return Product.Prices?.FirstOrDefault()?.price_nal + " руб/лист";
         }
         IsAvailable = false;
@@ -73,8 +72,25 @@
         if (IsAuthorized)
         {
             string res = await ShopingCartService.SetCart(shoppingCart, Token);
-            //if (res != "") OnInfoClick(res);
+            if (res != "") OnInfoClick(res);
         }
         else await localStorage.SetItemAsync("ShoppingCart", shoppingCart);
+
+        OnInfoClick("Товар добавлен в корзину");
+    }
+
+    private void OnInfoClick(string title, string content = "")
+    {
+        ToastService.Show(new BootstrapBlazor.Components.ToastOption()
+            {
+                // Notification category
+                Category = BootstrapBlazor.Components.ToastCategory.Success,
+
+                // Notification box Title value
+                Title = title,
+
+                // Notification body content
+                Content = content
+            });
     }
 }

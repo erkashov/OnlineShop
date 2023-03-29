@@ -7,34 +7,19 @@
             <CarouselItem>
                     <OnlineShop.Shared.MainPage.PromoBanner Header=@banner.Header
                                                     Description=@banner.Description
-                                                    ImageLink=@banner.ImageLink
-                                                    Link=@banner.Link
-                                                    LinkHeader=@banner.LinkHeader>
+                                                    ImageLink=@banner.FullImageLink
+                                                    Link=@banner.Link>
                     </OnlineShop.Shared.MainPage.PromoBanner>
             </CarouselItem>
         }
 </BootstrapBlazor.Components.Carousel>
 
 @code {
-    List<BannerData> Banners { get; set; } = new List<BannerData>();
+    List<PromoBanner> Banners { get; set; } = new List<PromoBanner>();
 
-    public CarouselComponent()
+    protected override async Task OnInitializedAsync()
     {
-        Banners.Add(new BannerData()
-            {
-                Header = "Все виды фанеры по низким ценам",
-                Description = "Большой выбор фанеры, ОСБ, ДВП, ДСП в наличии и под заказ",
-                ImageLink = "../src/banner-fanera.jpg",
-                Link = "/catalog",
-                LinkHeader = "Каталог"
-            });
-        Banners.Add(new BannerData()
-            {
-                Header = "Распил материала",
-                Description = "Услуги по качественному распилу деревянных изделий и листового материала - в строгом соответствии с требованиями заказчика",
-                ImageLink = "../src/banner-fanera.jpg",
-                Link = "https://faneradarom.usite.pro/index/raspil_materiala/0-11",
-                LinkHeader = "Прайс"
-            });
+        var resp = await HttpService.SendListAsync<PromoBanner>("PromoBanners/", HttpMethod.Get);
+        if (resp.IsSuccess) Banners = resp.Responce;
     }
 }

@@ -1,14 +1,13 @@
-﻿<div class="inline">
-    <a href=@Link>
+﻿@inherits ComponentBase
 
-        <div class="d-flex flex-row promo-banner">
-            <div class="d-flex flex-column promo-banner-content">
-                <h2>@Header</h2>
-                <h6>@Description</h6>
+<div class="inline">
+        <div class="promo-banner">
+            <img src="@ImageLink" alt="" class="promo-banner-image img-fluid" />
+            <div class="promo-banner-text">
+                <h3>@Header</h3>
+                <p>@Description</p>
             </div>
-            <img class="promo-banner-image" src=@ImageLink />
         </div>
-    </a>
 </div>
 
 @code {
