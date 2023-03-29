@@ -1,13 +1,13 @@
-﻿ <div class="d-flex flex-row promo-banner-main">
-            <div class="d-flex flex-column promo-banner-main-content">
-                <h2>@Header</h2>
-                <h5>@Description</h5>
+﻿<div class="d-flex flex-row promo-banner-main">
+        <div class="promo-banner">
     <a href=@Link>
-        <BootstrapBlazor.Components.Button class="btn-white">@LinkHeader</BootstrapBlazor.Components.Button>
-    </a>
-
+            <img src="@ImageLink" alt="" class="promo-banner-image img-fluid" />
+            <div class="promo-banner-text">
+                <h3>@Header</h3>
+                <p>@Description</p>
             </div>
-            <img class="promo-banner-main-image" src=@ImageLink />
+    </a>
+        </div>
 </div>
 
 @code {
@@ -22,15 +22,12 @@
 
     [Parameter]
     public string Link { get; set; }
-    
-    [Parameter]
-    public string LinkHeader { get; set; }
+
     public PromoBanner()
     {
         Header = "Заголовок";
         Description = "Описание";
         ImageLink = "";
         Link = "/";
-        LinkHeader = "Смотреть";
     }
 }

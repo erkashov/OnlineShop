@@ -5,11 +5,11 @@
 @inject Blazored.LocalStorage.ILocalStorageService localStorage
 @inject BootstrapBlazor.Components.SwalService SswalService
 @inject BootstrapBlazor.Components.ToastService ToastService
-
+<PageTitle>Купить @ProductItem.Naim2 в Казани</PageTitle>
 <div class="d-flex flex-column">
     <h1 class="product-page-header">@ProductItem.Naim2</h1>
     <div class="adaptive-container product-page-123">
-        <img src="../src/fanera-fk.jpg" class="product-page-image" />
+        <img src=@ProductItem.FullImageLink class="product-page-image" />
         <div class="d-flex flex-column">
             @if (ThicknessList.Count > 1)
             {
@@ -31,16 +31,18 @@
         </div>
         <div class="d-flex flex-column cart-itog">
             <span class="product-page-header">@GetPrice()</span>
-            <BootstrapInputNumber @bind-Value="@ProductCount" Min="1" Style="width:100px" />
-            <div class="d-flex flex-row">
-                @if (IsAvailable)
-                {
-                    <BootstrapBlazor.Components.Button IsAsync="true" OnClick="@AddToCart" class="product-cart-btn">В корзину</BootstrapBlazor.Components.Button>
-                }
-                else
-                {
-                    <BootstrapBlazor.Components.Button IsDisabled="true" class="product-cart-btn">Под заказ</BootstrapBlazor.Components.Button>
-                }
+            <div class="d-flex flex-row gap-20">
+                <BootstrapInputNumber @bind-Value="@ProductCount" Min="1" Style="width:100px" />
+                <div class="d-flex flex-row">
+                    @if (IsAvailable)
+                    {
+                        <BootstrapBlazor.Components.Button IsAsync="true" OnClick="@AddToCart" class="product-cart-btn">В корзину</BootstrapBlazor.Components.Button>
+                    }
+                    else
+                    {
+                        <BootstrapBlazor.Components.Button IsDisabled="true" class="product-cart-btn">Под заказ</BootstrapBlazor.Components.Button>
+                    }
+                </div>
             </div>
         </div>
     </div>
@@ -61,7 +63,7 @@
             </tr>
         </tbody>
     </table>
-
+    <div><p>@((MarkupString)ProductItem.NormalizedDescription)</p></div>
 </div>
 
 @code {
@@ -115,6 +117,8 @@
     {
         CategoryFilter filter = new CategoryFilter();
         filter.CategoryId = ProductItem.categoryID;
+        filter.ProductsSorts.Add(ProductItem.sort);
+        filter.Search = "";
         Products = await BaseHttpService<ShopLib.Product>.SendListAsync<ShopLib.Product>("Tovary/Filter", HttpMethod.Post, filter);
         ThicknessList = Products.Select(p => p.tol).Distinct().ToList();
         SortsList = Products.Select(p => p.sort).Distinct().ToList();

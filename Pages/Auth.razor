@@ -4,6 +4,7 @@
 @using OnlineShop.Models
 @inject IHttpContextAccessor httpContextAccessor
 @inject Blazored.LocalStorage.ILocalStorageService localStorage
+@inject IJSRuntime JSRuntime
 @using BootstrapBlazor.Components
 
 <PageTitle>Авторизация</PageTitle>
@@ -14,8 +15,11 @@
     <NotAuthorized>
         <div class="d-flex flex-column center-div gap-20">
             <h1>Авторизация</h1>
-            <BootstrapInput Placeholder="Почта" @bind-Value="@Email" type='phone'/>
-            <BootstrapInput Placeholder="Пароль" @bind-Value="@Password" type='password'/>
+            <div>
+                <label for="phone-mask" class="form-label">Телефон</label>
+                <input @bind="@Email" type="tel" id="phone-mask" class="form-control modified" placeholder="+7(000)000-00-00" />
+            </div>
+            <BootstrapInput Placeholder="Пароль" @bind-Value="@Password" type='password' />
             <BootstrapBlazor.Components.Button OnClick=@AuthClick IsAsync="true">Войти</BootstrapBlazor.Components.Button>
             <BootstrapBlazor.Components.Button OnClick=@RegClick>Регистрация</BootstrapBlazor.Components.Button>
         </div>
@@ -54,6 +58,13 @@
         //{
         //    CurrentUser = await localStorage.GetItemAsync<User>("CurrentUser");
         //}
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("masks");
+        }
     }
     private string encode(string param)
     {

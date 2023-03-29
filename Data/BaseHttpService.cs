@@ -7,7 +7,7 @@ namespace OnlineShop.Data
     public class BaseHttpService<T>
     {
         private static HttpClient _httpClient = new HttpClient();
-        private static readonly string _basePath = "http://localhost/api";
+        private static readonly string _basePath = "http://localhost:7082/api";
 
         public static async Task<List<T>> SendListAsync<T>(string action, HttpMethod method, object model = null)
         where T : class, new()
