@@ -56,27 +56,30 @@
                         </div>
                     }
                 </div>
-                <div class="cart-delivery">
-                    <div class="row g-3 form-inline">
-                        <div class="col-12 col-md-4">
-                            <BootstrapBlazor.Components.Switch OnColor="BootstrapBlazor.Components.Color.Success" OffColor="BootstrapBlazor.Components.Color.Secondary"
+                @if (false)
+                {
+                    <div class="cart-delivery">
+                        <div class="row g-3 form-inline">
+                            <div class="col-12 col-md-4">
+                                <BootstrapBlazor.Components.Switch OnColor="BootstrapBlazor.Components.Color.Success" OffColor="BootstrapBlazor.Components.Color.Secondary"
                                                            OnText="Распил" OffText="Распил" @bind-Value=@ShoppingCart.HasRaspil OnValueChanged=@OnValueChangedRaspil></BootstrapBlazor.Components.Switch>
+                            </div>
                         </div>
-                    </div>
-                    @if (ShoppingCart.HasRaspil)
-                    {
-                        <BootstrapBlazor.Components.BootstrapInput PlaceHolder="..." IsTrim="true" OnValueChanged="@OnValueChangedRaspilText"
+                        @if (ShoppingCart.HasRaspil)
+                        {
+                            <BootstrapBlazor.Components.BootstrapInput PlaceHolder="..." IsTrim="true" OnValueChanged="@OnValueChangedRaspilText"
                                                            TValue="string"
                                                            IsSelectAllTextOnFocus="true"
                                                            ShowLabel="true"
                                                            @bind-Value=@ShoppingCart.RaspilScheme
                                                            DisplayText="Размеры распила" />
-                        <div class="cart-itog-sum">
-                            <h5>Стоимость</h5>
-                            <h4>уточните у менеджера</h4>
-                        </div>
-                    }
-                </div>
+                            <div class="cart-itog-sum">
+                                <h5>Стоимость</h5>
+                                <h4>уточните у менеджера</h4>
+                            </div>
+                        }
+                    </div>
+                }
             </div>
             <div class="d-flex flex-column cart-itog">
                 <div class="d-flex flex-column cart-delivery">
@@ -84,7 +87,6 @@
                         <h4>Способ оплаты</h4>
                         <BootstrapBlazor.Components.RadioList TValue="int" OnSelectedChanged=@OnSelectedChangedTypeOplaty @bind-Value=@ShoppingCart.PaymentType
                                                           Items="@PayersTypes" IsVertical="true"></BootstrapBlazor.Components.RadioList>
-
                     </div>
                     <div>
                         <h4>Доставка</h4>
@@ -101,8 +103,8 @@
                             <BootstrapBlazor.Components.DateTimePicker TValue="DateTime" MinValue="@DateTime.Now" MaxValue="@DateTime.Now.AddDays(10)"
                                                                OnValueChanged="@OnDateValueChanged"
                                                                @bind-Value=@ShoppingCart.Delivery.DeliveryDate
-                                                               DisplayText="Дата и время доставки" ShowLabel="true" ViewMode="BootstrapBlazor.Components.DatePickerViewMode.DateTime"
-                                                               Format="dd.MM.yyyy HH:mm:ss"></BootstrapBlazor.Components.DateTimePicker>
+                                                               DisplayText="Дата доставки" ShowLabel="true" ViewMode="BootstrapBlazor.Components.DatePickerViewMode.DateTime"
+                                                               Format="dd.MM.yyyy"></BootstrapBlazor.Components.DateTimePicker>
                             <div class="cart-itog-sum">
                                 <h5>Стоимость</h5>
                                 <h4>@ShoppingCart.Delivery.DeliveryCost рублей</h4>

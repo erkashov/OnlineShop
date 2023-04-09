@@ -15,17 +15,18 @@
 <PageTitle>Регистрация</PageTitle>
 <div class="d-flex flex-column center-div gap-20">
     <h1>Регистрация</h1>
-    <div class="d-flex flex-column center-div gap-20">
-        <div> <BootstrapInput @bind-Value="@CurrentUser.surname" PlaceHolder="Фамилия" IsTrim="true" DisplayText="Фамилия" /></div>
+        <div class="d-flex flex-column center-div gap-20">
+        <div><BootstrapInput @bind-Value="@CurrentUser.surname" PlaceHolder="Фамилия" IsTrim="true" DisplayText="Фамилия" /></div>
         <div><BootstrapInput @bind-Value="@CurrentUser.name" PlaceHolder="Имя" IsTrim="true" ShowLabel="true" DisplayText="Имя" /></div>
         <div><BootstrapInput @bind-Value="@CurrentUser.papaname" PlaceHolder="Отчество" IsTrim="true" ShowLabel="true" DisplayText="Отчество" /></div>
         <div>
             <label for="phone-mask" class="form-label">Телефон</label>
             <input @bind="@CurrentUser.login" type="tel" id="phone-mask" class="form-control modified" placeholder="+7(000)000-00-00" />
         </div>
+        <div><BootstrapInput @bind-Value="@CurrentUser.email" type='email' autocomplete="none" PlaceHolder="Email" IsTrim="true" ShowLabel="true" DisplayText="Email" /></div>
         <div><BootstrapInput @bind-Value="@CurrentUser.password" PlaceHolder="Пароль" IsTrim="true" ShowLabel="true" DisplayText="Пароль" type="password" /></div>
 
-        <BootstrapBlazor.Components.Button ButtonType="BootstrapBlazor.Components.ButtonType.Submit" IsAsync="true" OnClick=@Regist>Войти</BootstrapBlazor.Components.Button>
+        <BootstrapBlazor.Components.Button ButtonType="BootstrapBlazor.Components.ButtonType.Submit" IsAsync="true" OnClick=@Regist>Зарегистрироваться</BootstrapBlazor.Components.Button>
     </div>
 </div>
 
@@ -41,26 +42,30 @@
         {
             if (CurrentUser.ValidatePhone())
             {
-                CurrentUser.role = "Customer";
-                var res = await HttpService<User>.SendListAsync<User>("Users", HttpMethod.Post, CurrentUser);
-                if (res.HasErrors)
+                if (CurrentUser.ValidateEmail())
                 {
-                    ErrorMessage("Ошибка запроса " + res.Error);
-                }
-                else
-                {
-                    var authResponce = await ShopLib.Auth.Login(CurrentUser.login, CurrentUser.password);
-                    if (authResponce.User != null)
+                    CurrentUser.role = "Customer";
+                    var res = await HttpService<User>.SendListAsync<User>("Users", HttpMethod.Post, CurrentUser);
+                    if (res.HasErrors)
                     {
-                        ShoppingCart cart = await localStorage.GetItemAsync<ShoppingCart>("ShoppingCart");
-                        if (cart != null)
+                        ErrorMessage("Ошибка запроса " + res.Error);
+                    }
+                    else
+                    {
+                        var authResponce = await ShopLib.Auth.Login(CurrentUser.login, CurrentUser.password);
+                        if (authResponce.User != null)
                         {
-                            string result = await ShopingCartService.PostCart(cart, authResponce.Token);
+                            ShoppingCart cart = await localStorage.GetItemAsync<ShoppingCart>("ShoppingCart");
+                            if (cart != null)
+                            {
+                                string result = await ShopingCartService.PostCart(cart, authResponce.Token);
+                            }
+                            await localStorage.SetItemAsync<ShoppingCart>("ShoppingCart", null);
+                            NavigationManag.NavigateTo($"/login?token={encode(authResponce.Token)}", true);
                         }
-                        await localStorage.SetItemAsync<ShoppingCart>("ShoppingCart", null);
-                        NavigationManag.NavigateTo($"/login?token={encode(authResponce.Token)}", true);
                     }
                 }
+                else ErrorMessage("Email указан неверно");
             }
             else ErrorMessage("Номер телефона указан неверно");
         }

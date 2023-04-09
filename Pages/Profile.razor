@@ -16,6 +16,7 @@
         <BootstrapInput @bind-Value="@CurrentUser.name" PlaceHolder="Имя" IsTrim="true" ShowLabel="true" DisplayText="Имя" />
         <BootstrapInput @bind-Value="@CurrentUser.papaname" PlaceHolder="Отчество" IsTrim="true" ShowLabel="true" DisplayText="Отчество" />
         <BootstrapInput @bind-Value="@CurrentUser.login" Formatter="@PhoneFormatter" PlaceHolder="Телефон" IsTrim="true" ShowLabel="true" DisplayText="Телефон" type='phone' />
+        <BootstrapInput @bind-Value="@CurrentUser.email" PlaceHolder="info@masterWood.ru" IsTrim="true" ShowLabel="true" DisplayText="Email" />
 
         <BootstrapBlazor.Components.Button OnClick=@SaveChanges>Сохранить</BootstrapBlazor.Components.Button>
         <BootstrapBlazor.Components.Button OnClick=@Logout Color="BootstrapBlazor.Components.Color.Danger">Выйти</BootstrapBlazor.Components.Button>

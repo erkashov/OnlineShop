@@ -130,6 +130,10 @@ a {
     gap: 20px;
 }
 
+.phone-link-header {
+    visibility: collapse;
+}
+
 @media (max-width: 800px) {
     .nav-bar {
         /* Изменяем направление оси в шапке на вертикальное */
@@ -151,6 +155,10 @@ a {
 
     .cart-itog {
         margin-right: auto;
+    }
+
+    .phone-link-header {
+        visibility: visible;
     }
 }
 
