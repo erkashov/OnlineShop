@@ -335,7 +335,7 @@
         StateHasChanged();
         foreach (var prodCart in ShoppingCart.ProductCarts)
         {
-            int stock = await GlobalMethod.GetProductStock(prodCart.Product.ID);
+            int stock = await ShopLib.Product.GetProductStock(prodCart.Product.ID);
             if (stock > 0)
             {
                 if (stock < prodCart.Count)

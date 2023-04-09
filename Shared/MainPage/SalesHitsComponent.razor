@@ -15,7 +15,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var salesHitsResp = await HttpService<Product>.SendListAsync<Product>("Tovary/salesHits", HttpMethod.Get);
+        var salesHitsResp = await HttpService.SendListAsync<Product>("Tovary/salesHits", HttpMethod.Get);
        if (!salesHitsResp.HasErrors) salesHits = salesHitsResp.Responce;
     }
 }

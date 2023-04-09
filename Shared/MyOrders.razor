@@ -86,7 +86,7 @@
         if (!IsAuthorized) NavigationManager.NavigateTo("/auth");
         if (IsAuthorized)
         {
-            var orders_resp = await HttpService<Sklad_rashod>.SendListAsync<Sklad_rashod>("Sklad_rashod/myorders", HttpMethod.Get, null, Token);
+            var orders_resp = await HttpService.SendListAsync<Sklad_rashod>("Sklad_rashod/myorders", HttpMethod.Get, null, Token);
             if (orders_resp.Responce != null) Orders = orders_resp.Responce;
         }
     }

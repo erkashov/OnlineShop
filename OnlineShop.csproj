@@ -22,6 +22,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\API\ShopLib\ShopLib.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="ShopLib">
       <HintPath>..\erkashov\Api\ShopLib\bin\Debug\net6.0\ShopLib.dll</HintPath>
     </Reference>

@@ -29,9 +29,9 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        int stock = await GlobalMethod.GetProductStock(Id);
+        int stock = await Product.GetProductStock(Id);
         IsAvailable = stock > 0;
-        Product = (await BaseHttpService<Product>.SendListAsync<Product>("Tovary/" + Id, HttpMethod.Get)).FirstOrDefault();
+        Product = (await BaseHttpServices<Product>.SendListAsync<Product>("Tovary/" + Id, HttpMethod.Get)).FirstOrDefault();
     }
 
     private string GetPrice()

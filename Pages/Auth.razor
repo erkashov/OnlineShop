@@ -1,7 +1,6 @@
 ﻿@page "/auth"
 @using System.Web;
 @using Microsoft.AspNetCore.Http
-@using OnlineShop.Models
 @inject IHttpContextAccessor httpContextAccessor
 @inject Blazored.LocalStorage.ILocalStorageService localStorage
 @inject IJSRuntime JSRuntime
@@ -77,7 +76,7 @@
             var authResponce = await ShopLib.Auth.Login(Email, Password);
             if (authResponce.User != null)
             {
-                HttpService<ShoppingCart>.SetToken(authResponce.Token);
+                HttpService.SetToken(authResponce.Token);
                 ShoppingCart cart = await localStorage.GetItemAsync<ShoppingCart>("ShoppingCart");
                 if (cart != null)
                 {

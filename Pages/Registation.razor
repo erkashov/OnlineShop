@@ -1,15 +1,11 @@
 ﻿@page "/sign-up"
 @using System.Web;
 @using Microsoft.AspNetCore.Http
-@using OnlineShop.Models
-@inject IHttpContextAccessor httpContextAccessor
 @inject Blazored.LocalStorage.ILocalStorageService localStorage
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
 @using BootstrapBlazor.Components
 @using Microsoft.AspNetCore.Components.Web
-@inject IJSRuntime JS;
-@inject BootstrapBlazor.Components.SwalService SswalService
 @inject BootstrapBlazor.Components.ToastService ToastService
 
 <PageTitle>Регистрация</PageTitle>
@@ -45,7 +41,7 @@
                 if (CurrentUser.ValidateEmail())
                 {
                     CurrentUser.role = "Customer";
-                    var res = await HttpService<User>.SendListAsync<User>("Users", HttpMethod.Post, CurrentUser);
+                    var res = await HttpService.SendListAsync<User>("Users", HttpMethod.Post, CurrentUser);
                     if (res.HasErrors)
                     {
                         ErrorMessage("Ошибка запроса " + res.Error);

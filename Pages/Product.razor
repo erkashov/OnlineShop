@@ -91,10 +91,10 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        int stock = await GlobalMethod.GetProductStock(Id);
+        int stock = await ShopLib.Product.GetProductStock(Id);
         IsAvailable = stock > 0;
 
-        ProductItem = (await BaseHttpService<ShopLib.Product>.SendListAsync<ShopLib.Product>("Tovary/" + Id, HttpMethod.Get)).FirstOrDefault();
+        ProductItem = (await BaseHttpServices<ShopLib.Product>.SendListAsync<ShopLib.Product>("Tovary/" + Id, HttpMethod.Get)).FirstOrDefault();
         await GetProducts();
     }
 
@@ -119,7 +119,7 @@
         filter.CategoryId = ProductItem.categoryID;
         filter.ProductsSorts.Add(ProductItem.sort);
         filter.Search = "";
-        Products = await BaseHttpService<ShopLib.Product>.SendListAsync<ShopLib.Product>("Tovary/Filter", HttpMethod.Post, filter);
+        Products = await BaseHttpServices<ShopLib.Product>.SendListAsync<ShopLib.Product>("Tovary/Filter", HttpMethod.Post, filter);
         ThicknessList = Products.Select(p => p.tol).Distinct().ToList();
         SortsList = Products.Select(p => p.sort).Distinct().ToList();
         SortItems = new List<SelectedItem>();
@@ -144,7 +144,7 @@
     {
         if (ProductCount > 0)
         {
-            int stock = await GlobalMethod.GetProductStock(Id);
+            int stock = await ShopLib.Product.GetProductStock(Id);
             if (stock >= ProductCount)
             {
                 ShoppingCart? shoppingCart;

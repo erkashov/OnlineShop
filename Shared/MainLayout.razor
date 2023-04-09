@@ -1,5 +1,4 @@
 ﻿@inherits LayoutComponentBase
-@using OnlineShop.Models
 
 <PageTitle>OnlineShop</PageTitle>
 
@@ -45,7 +44,7 @@
                     {
                         Token = tokenClaim.Value;
                         IsAuthorized = true;
-                        HttpService<ShoppingCart>.SetToken(Token);
+                        HttpService.SetToken(Token);
                     }
                 }
             }
